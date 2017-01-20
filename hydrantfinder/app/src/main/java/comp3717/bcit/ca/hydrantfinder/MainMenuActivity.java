@@ -1,8 +1,10 @@
 package comp3717.bcit.ca.hydrantfinder;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +17,7 @@ import android.view.MenuItem;
 
 public class MainMenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = MainMenuActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,5 +100,11 @@ public class MainMenuActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void navigateToSetFilterActivity(final View view){
+        Log.d(TAG, "enter navigateToSetFilterActivity");
+        Intent intentToNavigate = new Intent(this, SetFilterActivity.class);
+        startActivity(intentToNavigate);
     }
 }
