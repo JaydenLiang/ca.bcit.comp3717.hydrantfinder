@@ -1,23 +1,18 @@
-package comp3717.bcit.ca.hydrantfinder;
+package comp3717.bcit.ca.hydrantfinder.SearchAddress;
 
 import android.content.Context;
-import android.content.Intent;
-import android.database.DataSetObserver;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.List;
 
-import static android.R.attr.resource;
+import comp3717.bcit.ca.hydrantfinder.R;
 
 /**
  * Created by jaydenliang on 2017-01-21.

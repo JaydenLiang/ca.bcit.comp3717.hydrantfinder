@@ -1,7 +1,6 @@
-package comp3717.bcit.ca.hydrantfinder;
+package comp3717.bcit.ca.hydrantfinder.SearchAddress;
 
 import android.content.Context;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +10,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+
+import comp3717.bcit.ca.hydrantfinder.ChildRow;
+import comp3717.bcit.ca.hydrantfinder.ParentRow;
+import comp3717.bcit.ca.hydrantfinder.R;
 
 /**
  * Created by jaydenliang on 2017-01-20.
@@ -68,7 +71,7 @@ public class SearchExpandableListAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         ParentRow parentRow = (ParentRow) getGroup(groupPosition);
         if(convertView == null) {
-            LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.parent_row, null);
         }
 
@@ -81,7 +84,7 @@ public class SearchExpandableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         ChildRow childRow = (ChildRow) getChild(groupPosition, childPosition);
         if(convertView == null) {
-            LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.child_row, null);
         }
         ImageView childIcon = (ImageView) convertView.findViewById(R.id.child_icon);

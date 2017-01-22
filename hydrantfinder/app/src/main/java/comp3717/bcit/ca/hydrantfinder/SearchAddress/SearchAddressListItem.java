@@ -1,4 +1,4 @@
-package comp3717.bcit.ca.hydrantfinder;
+package comp3717.bcit.ca.hydrantfinder.SearchAddress;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -8,11 +8,29 @@ import android.os.Parcelable;
  */
 
 public class SearchAddressListItem implements Parcelable {
+    // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
+    public static final Parcelable.Creator<SearchAddressListItem> CREATOR = new Parcelable
+            .Creator<SearchAddressListItem>() {
+        public SearchAddressListItem createFromParcel(Parcel in) {
+            return new SearchAddressListItem(in);
+        }
+
+        public SearchAddressListItem[] newArray(int size) {
+            return new SearchAddressListItem[size];
+        }
+    };
     private int icon;
     private String address;
+
     public SearchAddressListItem(String address, int icon) {
         this.address = address;
         this.icon = icon;
+    }
+
+    // example constructor that takes a Parcel and gives you an object populated with it's values
+    private SearchAddressListItem(Parcel in) {
+        icon = in.readInt();
+        address = in.readString();
     }
 
     public String getAddress() {
@@ -40,23 +58,5 @@ public class SearchAddressListItem implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(icon);
         dest.writeString(address);
-    }
-
-    // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
-    public static final Parcelable.Creator<SearchAddressListItem> CREATOR = new Parcelable
-            .Creator<SearchAddressListItem>() {
-        public SearchAddressListItem createFromParcel(Parcel in) {
-            return new SearchAddressListItem(in);
-        }
-
-        public SearchAddressListItem[] newArray(int size) {
-            return new SearchAddressListItem[size];
-        }
-    };
-
-    // example constructor that takes a Parcel and gives you an object populated with it's values
-    private SearchAddressListItem(Parcel in) {
-        icon = in.readInt();
-        address = in.readString();
     }
 }

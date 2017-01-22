@@ -31,12 +31,13 @@ public class SetFilterActivity extends AppCompatActivity {
     }
 
     public void cancelSetFilter(final View view) {
-        navigateToMainMenu(view);
+        finish();
     }
 
     public void navigateToMainMenu(final View view){
         Intent intentToNavigate = new Intent(this, MainMenuActivity.class);
         startActivity(intentToNavigate);
+        finish();
     }
 
 }
