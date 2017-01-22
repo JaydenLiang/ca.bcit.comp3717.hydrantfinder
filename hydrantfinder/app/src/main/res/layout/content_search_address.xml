@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/content_search_address"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingBottom="@dimen/activity_vertical_margin"
+              android:paddingLeft="@dimen/activity_horizontal_margin"
+              android:paddingRight="@dimen/activity_horizontal_margin"
+              android:paddingTop="@dimen/activity_vertical_margin"
+              app:layout_behavior="@string/appbar_scrolling_view_behavior"
+              tools:context="comp3717.bcit.ca.hydrantfinder.SearchAddressActivity"
+              tools:showIn="@layout/activity_search_address"
+              android:weightSum="1">
+
+    <Button
+        android:text="Cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_cancel_search"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="cancelSearch" />
+
+    <!--<ExpandableListView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:id="@+id/expandableListView_search_result_container"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_below="@id/textview_input_address"></ExpandableListView>-->
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:id="@+id/listview_search_result"
+        />
+</RelativeLayout>
