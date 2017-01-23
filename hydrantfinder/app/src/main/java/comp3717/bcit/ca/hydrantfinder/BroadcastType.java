@@ -5,5 +5,6 @@ package comp3717.bcit.ca.hydrantfinder;
  */
 
 public class BroadcastType {
+    
     public static final String LOCAL_ADDRESS_RELOCATION = "local_address_relocation";
 }
