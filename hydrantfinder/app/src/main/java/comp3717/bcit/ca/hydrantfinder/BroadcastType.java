@@ -7,4 +7,5 @@ package comp3717.bcit.ca.hydrantfinder;
 public class BroadcastType {
     
     public static final String LOCAL_ADDRESS_RELOCATION = "local_address_relocation";
+    public static final String LOCAL_DISPLAY_HYDRANT_ITEM = "local_display_hydrant_item";
 }

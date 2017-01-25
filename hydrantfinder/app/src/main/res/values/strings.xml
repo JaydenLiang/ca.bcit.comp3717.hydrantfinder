@@ -11,4 +11,5 @@
     <string name="app_label">Search</string>
     <string name="search_hint">Search Me</string>
     <string name="search">Search</string>
+    <string name="title_activity_show_item">ShowItemActivity</string>
 </resources>

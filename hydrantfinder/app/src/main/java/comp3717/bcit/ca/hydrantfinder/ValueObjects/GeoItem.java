@@ -1,4 +1,4 @@
-package comp3717.bcit.ca.hydrantfinder.SearchAddress;
+package comp3717.bcit.ca.hydrantfinder.ValueObjects;
 
 import android.os.Parcel;
 import android.os.Parcelable;

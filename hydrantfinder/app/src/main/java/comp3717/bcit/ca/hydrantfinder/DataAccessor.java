@@ -6,10 +6,12 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 
-import comp3717.bcit.ca.hydrantfinder.SearchAddress.GeoItem;
 import comp3717.bcit.ca.hydrantfinder.SearchAddress.SearchAddressListItem;
+import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoItem;
+import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
 
 /**
+ * This class provides methods to use data from backend
  * Created by jaydenliang on 2017-01-21.
  */
 
@@ -61,5 +63,16 @@ public class DataAccessor {
 
     public ArrayList<SearchAddressListItem> getHistorySearchAddress() {
         return historySearchAddressListItems;
+    }
+
+    public void retrieveHydrantItem(Context context, int itemId, boolean showItem) {
+        //retrieve data from db
+        HydrantItem hydrantItem = new HydrantItem(1, "49.2718919", "-123.0001673");
+        //broadcast to display the item
+        if (showItem) {
+            Intent intentToDisplayHydrantItem = new Intent(BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM);
+            intentToDisplayHydrantItem.putExtra("hydrantItem", hydrantItem);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intentToDisplayHydrantItem);
+        }
     }
 }

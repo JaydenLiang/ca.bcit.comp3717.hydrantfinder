@@ -14,23 +14,34 @@
     tools:showIn="@layout/app_bar_main_menu">
 
     <Button
-        android:text="Filter"
+        android:id="@+id/button_nav_setfilter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/button_nav_setfilter"
-        android:layout_marginEnd="11dp"
-        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="11dp"
         android:layout_marginTop="13dp"
-        android:onClick="navigateToSetFilterActivity"/>
+        android:onClick="navigateToSetFilterActivity"
+        android:text="Filter"/>
 
     <Button
-        android:text="Search Address"
+        android:id="@+id/button_nav_search_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:id="@+id/button_nav_search_address"
-        android:onClick="navigateToSearchAddressActivity" />
+        android:onClick="navigateToSearchAddressActivity"
+        android:text="Search Address"/>
+
+    <Button
+        android:id="@+id/button_test_display_hydrant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/button_nav_setfilter"
+        android:layout_below="@+id/button_nav_setfilter"
+        android:layout_marginEnd="35dp"
+        android:layout_marginTop="70dp"
+        android:onClick="navigateToShowItemActivity"
+        android:text="test hydrant item 1"/>
 
 </RelativeLayout>

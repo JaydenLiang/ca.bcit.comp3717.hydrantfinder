@@ -19,13 +19,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import comp3717.bcit.ca.hydrantfinder.SearchAddress.GeoItem;
 import comp3717.bcit.ca.hydrantfinder.SearchAddress.SearchAddressActivity;
+import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoItem;
+import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
 
 public class MainMenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = MainMenuActivity.class.getName();
     private BroadcastReceiver addressRelocationReceiver;
+    private BroadcastReceiver retrieveHydrantItemEventReceiver;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +64,19 @@ public class MainMenuActivity extends AppCompatActivity
 
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(addressRelocationReceiver, new
                 IntentFilter(BroadcastType.LOCAL_ADDRESS_RELOCATION));
+
+        retrieveHydrantItemEventReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                HydrantItem hydrantItem = intent.getParcelableExtra("hydrantItem");
+                Toast.makeText(getApplicationContext(), "navigate to show hydrant: id = " + hydrantItem.getHydrantId(),
+                        Toast.LENGTH_LONG).show();
+                displayHydrantItem(hydrantItem);
+            }
+        };
+
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(retrieveHydrantItemEventReceiver,
+                new IntentFilter(BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM));
     }
 
     @Override
@@ -109,5 +124,16 @@ public class MainMenuActivity extends AppCompatActivity
         Log.d(TAG, "enter navigateToSearchAddressActivity");
         Intent intentToOpenSearchAddress = new Intent(this, SearchAddressActivity.class);
         startActivity(intentToOpenSearchAddress);
+    }
+
+    private void displayHydrantItem(HydrantItem hydrantItem) {
+        Intent intentToDisplayHydrantItem = new Intent(this, ShowItemActivity.class);
+        intentToDisplayHydrantItem.putExtra("hydrantItem", hydrantItem);
+        startActivity(intentToDisplayHydrantItem);
+    }
+
+    public void navigateToShowItemActivity(final View view) {
+        Log.d(TAG, "enter navigateToShowItemActivity");
+        DataAccessor.getInstance().retrieveHydrantItem(getApplicationContext(), 1, true);
     }
 }
