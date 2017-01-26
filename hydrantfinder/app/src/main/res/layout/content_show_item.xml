@@ -22,4 +22,127 @@
         android:layout_alignParentTop="true"
         android:onClick="exitShowItem"
         android:text="Back"/>
+
+    <TextView
+        android:id="@+id/textView_group_label_coordinates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/button_exit_show_item"
+        android:text="Coordinates"
+        android:textSize="30sp"/>
+
+    <TextView
+        android:id="@+id/textView_show_item_coord_x"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/textView_group_label_coordinates"
+        android:text="X:"
+        android:textSize="30sp"/>
+
+
+    <EditText
+        android:id="@+id/editText_show_item_coord_x"
+        android:layout_width="140sp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/textView_show_item_coord_x"
+        android:layout_toEndOf="@id/textView_show_item_coord_x"
+        android:ems="10"
+        android:inputType="numberDecimal"/>
+
+    <TextView
+        android:id="@+id/textView_show_item_coord_y"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/editText_show_item_coord_x"
+        android:layout_toEndOf="@id/editText_show_item_coord_x"
+        android:text="Y:"
+        android:textSize="30sp"/>
+
+    <EditText
+        android:id="@+id/editText_show_item_coord_y"
+        android:layout_width="140sp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textView_show_item_coord_y"
+        android:layout_toEndOf="@+id/textView_show_item_coord_y"
+        android:ems="10"
+        android:inputType="numberDecimal"/>
+
+    <TextView
+        android:id="@+id/textView_group_label_specification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView_show_item_coord_x"
+        android:text="Specification:"
+        android:textSize="30sp"/>
+
+    <TextView
+        android:id="@+id/textView_show_item_con_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView_group_label_specification"
+        android:text="Connector size:"
+        android:textSize="20sp"/>
+
+    <EditText
+        android:id="@+id/editText_show_item_con_size"
+        android:layout_width="100sp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/textView_show_item_con_size"
+        android:layout_toEndOf="@+id/textView_show_item_con_size"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:text="0"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/textView_show_item_port_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText_show_item_con_size"
+        android:text="Port number:"
+        android:textSize="20sp"/>
+
+    <EditText
+        android:id="@+id/editText_show_item_port_number"
+        android:layout_width="100sp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/textView_show_item_port_number"
+        android:layout_toEndOf="@+id/textView_show_item_port_number"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:text="0"
+        android:textSize="20sp"/>
+
+    <EditText
+        android:id="@+id/editText_show_item_water_pressure"
+        android:layout_width="100sp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/textView_show_item_water_pressure"
+        android:layout_toEndOf="@+id/textView_show_item_water_pressure"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:text="0"
+        android:textSize="20sp"/>
+
+    <Button
+        android:id="@+id/button_show_item_update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="updateItem"
+        android:text="Update"/>
+
+    <TextView
+        android:id="@+id/textView_show_item_water_pressure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editText_show_item_port_number"
+        android:text="Water Pressure:"
+        android:textSize="20sp"/>
+
 </RelativeLayout>

@@ -23,4 +23,109 @@
         android:onClick="cancelSetFilter"
         android:text="cancel"/>
 
+    <TextView
+        android:id="@+id/textView_set_filter_group_label_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/button_cancel_setfilter"
+        android:text="Hydrant States:"
+        android:textSize="24sp"/>
+
+    <Spinner
+        android:id="@+id/spinner_set_filter_pressure_level_lower"
+        android:layout_width="100sp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView_set_filter_water_pressure_range"
+        android:layout_marginTop="14dp"/>
+
+    <TextView
+        android:id="@+id/textView_set_filter_pressure_unit_lower"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/spinner_set_filter_pressure_level_lower"
+        android:layout_toEndOf="@+id/spinner_set_filter_pressure_level_lower"
+        android:text="Mpa"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/textView_set_filter_pressure_unit_upper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/spinner_set_filter_pressure_level_upper"
+        android:layout_alignEnd="@+id/button_cancel_setfilter"
+        android:text="Mpa"
+        android:textSize="18sp"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroup_set_filter_state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView_set_filter_group_label_state"
+        android:checkedButton="@+id/radioButton_set_filter_state_good"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radioButton_set_filter_state_good"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/textView_set_filter_group_label_state"
+            android:checked="true"
+            android:text="Good"/>
+
+        <RadioButton
+            android:id="@+id/radioButton_set_filter_state_low"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/textView_set_filter_group_label_state"
+            android:layout_below="@+id/textView_set_filter_group_label_state"
+            android:text="Low"/>
+
+        <RadioButton
+            android:id="@+id/radioButton_set_filter_state_bad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textView_set_filter_group_label_state"
+            android:layout_toStartOf="@+id/button_cancel_setfilter"
+            android:text="Bad"/>
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/textView_set_filter_water_pressure_range"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/radioGroup_set_filter_state"
+        android:text="Water Pressure Range:"
+        android:textSize="24sp"/>
+
+    <Button
+        android:id="@+id/button_set_filter_apply_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="applyFilter"
+        android:text="Apply Filter"/>
+
+    <TextView
+        android:id="@+id/textView_set_filter_pressure_range_to"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/spinner_set_filter_pressure_level_upper"
+        android:layout_alignEnd="@+id/textView_set_filter_group_label_state"
+        android:text="to"
+        android:textSize="18sp"/>
+
+    <Spinner
+        android:id="@+id/spinner_set_filter_pressure_level_upper"
+        android:layout_width="100sp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/textView_set_filter_pressure_unit_lower"
+        android:layout_marginStart="18dp"
+        android:layout_toEndOf="@+id/textView_set_filter_pressure_range_to"/>
+
 </RelativeLayout>

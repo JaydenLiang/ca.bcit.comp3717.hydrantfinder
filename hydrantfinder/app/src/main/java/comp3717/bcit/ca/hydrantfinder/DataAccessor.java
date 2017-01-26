@@ -67,12 +67,42 @@ public class DataAccessor {
 
     public void retrieveHydrantItem(Context context, int itemId, boolean showItem) {
         //retrieve data from db
-        HydrantItem hydrantItem = new HydrantItem(1, "49.2718919", "-123.0001673");
+        HydrantItem hydrantItem = new HydrantItem(1, new GeoItem("49.2718919", "-123.0001673"), 1, 2, 5.5);
         //broadcast to display the item
         if (showItem) {
             Intent intentToDisplayHydrantItem = new Intent(BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM);
             intentToDisplayHydrantItem.putExtra("hydrantItem", hydrantItem);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intentToDisplayHydrantItem);
         }
+    }
+
+    public ArrayList<String> getWaterPressureLevelRangeLowerBound() {
+        ArrayList<String> list = new ArrayList<>();
+        list.add("1");
+        list.add("2");
+        list.add("3");
+        list.add("4");
+        list.add("5");
+        list.add("6");
+        list.add("7");
+        list.add("8");
+        list.add("9");
+        list.add("10");
+        return list;
+    }
+
+    public ArrayList<String> getWaterPressureLevelRangeUpperBound() {
+        ArrayList<String> list = new ArrayList<>();
+        list.add("1");
+        list.add("2");
+        list.add("3");
+        list.add("4");
+        list.add("5");
+        list.add("6");
+        list.add("7");
+        list.add("8");
+        list.add("9");
+        list.add("10");
+        return list;
     }
 }

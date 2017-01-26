@@ -127,6 +127,7 @@ public class MainMenuActivity extends AppCompatActivity
     }
 
     private void displayHydrantItem(HydrantItem hydrantItem) {
+        Log.d(TAG, "enter displayHydrantItem");
         Intent intentToDisplayHydrantItem = new Intent(this, ShowItemActivity.class);
         intentToDisplayHydrantItem.putExtra("hydrantItem", hydrantItem);
         startActivity(intentToDisplayHydrantItem);
