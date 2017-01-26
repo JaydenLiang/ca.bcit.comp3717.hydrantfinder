@@ -116,12 +116,21 @@
         android:text="0"
         android:textSize="20sp"/>
 
+    <TextView
+        android:id="@+id/textView_show_item_water_pressure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editText_show_item_port_number"
+        android:text="Water Pressure:"
+        android:textSize="20sp"/>
+
     <EditText
         android:id="@+id/editText_show_item_water_pressure"
         android:layout_width="100sp"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/textView_show_item_water_pressure"
-        android:layout_toEndOf="@+id/textView_show_item_water_pressure"
+        android:layout_toEndOf="@id/textView_show_item_water_pressure"
         android:ems="10"
         android:inputType="numberDecimal"
         android:text="0"
@@ -135,14 +144,5 @@
         android:layout_centerHorizontal="true"
         android:onClick="updateItem"
         android:text="Update"/>
-
-    <TextView
-        android:id="@+id/textView_show_item_water_pressure"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/editText_show_item_port_number"
-        android:text="Water Pressure:"
-        android:textSize="20sp"/>
 
 </RelativeLayout>
