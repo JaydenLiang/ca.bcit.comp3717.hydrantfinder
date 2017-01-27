@@ -137,4 +137,18 @@ public class MainMenuActivity extends AppCompatActivity
         Log.d(TAG, "enter navigateToShowItemActivity");
         DataAccessor.getInstance().retrieveHydrantItem(getApplicationContext(), 1, true);
     }
+    public void navigateToSetPortInfo(final View view){
+        Log.d(TAG, "enter navigateToSetPortInfo");
+        Intent intentToOpenSetPortInfo = new Intent(this, SetPortInfo.class);
+        startActivity(intentToOpenSetPortInfo);
+    }
+
+    public void navigateToGetPortInfo(final View view){
+        Log.d(TAG, "enter navigateToGetPortInfo");
+        Intent intentToOpenGetPortInfo = new Intent(this, GetPortInfo.class);
+        startActivity(intentToOpenGetPortInfo);
+    }
+
 }
+
+
