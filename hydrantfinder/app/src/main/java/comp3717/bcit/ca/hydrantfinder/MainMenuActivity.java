@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -19,15 +20,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.MapView;
+
 import comp3717.bcit.ca.hydrantfinder.SearchAddress.SearchAddressActivity;
-import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoItem;
+import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoLocHydrants;
 import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
 
 public class MainMenuActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, MainMapFragment.OnFragmentInteractionListener {
     private static final String TAG = MainMenuActivity.class.getName();
     private BroadcastReceiver addressRelocationReceiver;
     private BroadcastReceiver retrieveHydrantItemEventReceiver;
+    private MapView googleMap;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,12 +59,17 @@ public class MainMenuActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        initialMap();
+
         addressRelocationReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                GeoItem location = intent.getParcelableExtra("location");
-                Toast.makeText(getApplicationContext(), "New Location: " + location.getX() + "," + location.getY(),
-                        Toast.LENGTH_LONG).show();
+                GeoLocHydrants geoLocHydrants = intent.getParcelableExtra("geoLocHydrants");
+                //add markers on the map
+                //updateHydrantOnMap(geoLocHydrants);
+                Toast.makeText(getApplicationContext(), "Found " + geoLocHydrants.getHydrantItems().size() +
+                        " Hydrant(s) around Location: " + geoLocHydrants.getGeoLocation().latitude + "," + geoLocHydrants
+                        .getGeoLocation().longitude, Toast.LENGTH_LONG).show();
             }
         };
 
@@ -77,6 +88,16 @@ public class MainMenuActivity extends AppCompatActivity
 
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(retrieveHydrantItemEventReceiver,
                 new IntentFilter(BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM));
+    }
+
+    private void initialMap() {
+        if (googleMap != null) return;
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        if (googleAPI.isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS) {
+            //MapFragment mapFragment = getFragmentManager().findFragmentById(R.id.mapView_main_google_map);
+            //Fragment ragment = getFragmentManager().findFragmentById(R.id.mapView_main_google_map);
+            //ragment.getActivity();
+        }
     }
 
     @Override
@@ -137,6 +158,7 @@ public class MainMenuActivity extends AppCompatActivity
         Log.d(TAG, "enter navigateToShowItemActivity");
         DataAccessor.getInstance().retrieveHydrantItem(getApplicationContext(), 1, true);
     }
+
     public void navigateToSetPortInfo(final View view){
         Log.d(TAG, "enter navigateToSetPortInfo");
         Intent intentToOpenSetPortInfo = new Intent(this, SetPortInfo.class);
@@ -149,6 +171,10 @@ public class MainMenuActivity extends AppCompatActivity
         startActivity(intentToOpenGetPortInfo);
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 }
 
 

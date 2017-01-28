@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 
 import comp3717.bcit.ca.hydrantfinder.SearchAddress.SearchAddressListItem;
-import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoItem;
+import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoLocHydrants;
 import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
 
 /**
@@ -42,7 +44,12 @@ public class DataAccessor {
 
     public void applySearchAddress(Context context, String address) {
         Intent intentToRelocate = new Intent(BroadcastType.LOCAL_ADDRESS_RELOCATION);
-        intentToRelocate.putExtra("location", new GeoItem("49.2718919", "-123.0001673"));
+        LatLng geoLocation = new LatLng(49.2509962, -123.0119258);
+        ArrayList<HydrantItem> hydrantItems = new ArrayList<>();
+        hydrantItems.add(new HydrantItem(1, new LatLng(49.2509902, -123.0119208)));
+        hydrantItems.add(new HydrantItem(2, new LatLng(49.2509762, -123.0119558)));
+        GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, hydrantItems);
+        intentToRelocate.putExtra("geoLocHydrants", geoLocHydrants);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intentToRelocate);
     }
 
@@ -67,7 +74,7 @@ public class DataAccessor {
 
     public void retrieveHydrantItem(Context context, int itemId, boolean showItem) {
         //retrieve data from db
-        HydrantItem hydrantItem = new HydrantItem(1, new GeoItem("49.2718919", "-123.0001673"), 1, 2, 5.5);
+        HydrantItem hydrantItem = new HydrantItem(1, new LatLng(49.2509962, -123.0119258), 1, 2, 5.5);
         //broadcast to display the item
         if (showItem) {
             Intent intentToDisplayHydrantItem = new Intent(BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM);

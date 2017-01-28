@@ -8,6 +8,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoLocHydrants;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -17,7 +28,7 @@ import android.view.ViewGroup;
  * Use the {@link MainMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MainMapFragment extends Fragment {
+public class MainMapFragment extends Fragment implements OnMapReadyCallback {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -26,6 +37,10 @@ public class MainMapFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private GoogleMap googleMap;
+    private MapView mapView;
+    private View view;
 
     private OnFragmentInteractionListener mListener;
 
@@ -64,7 +79,19 @@ public class MainMapFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main_map, container, false);
+        this.view = inflater.inflate(R.layout.fragment_main_map, container, false);
+        return this.view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mapView = (MapView) view.findViewById(R.id.mapView_main_google_map);
+        if (mapView != null) {
+            mapView.onCreate(null);
+            mapView.onResume();
+            mapView.getMapAsync(this);
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -89,6 +116,23 @@ public class MainMapFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        MapsInitializer.initialize(getContext());
+        this.googleMap = googleMap;
+        this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        LatLng geoLocation = new LatLng(49.2509962, -123.0119258);
+        this.googleMap.addMarker(new MarkerOptions().position(geoLocation).title("BCIT")
+                .snippet("COMP3717 is awesome!"));
+        CameraPosition cameraPosition = CameraPosition.builder().target(geoLocation).zoom
+                (16).bearing(0).tilt(0).build();
+        this.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+
+    public void updateHydrantsOnMap(GeoLocHydrants geoLocHydrants) {
+
     }
 
     /**

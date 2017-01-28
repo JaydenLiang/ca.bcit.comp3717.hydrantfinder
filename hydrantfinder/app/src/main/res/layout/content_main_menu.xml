@@ -44,4 +44,12 @@
         android:onClick="navigateToShowItemActivity"
         android:text="test hydrant item 1"/>
 
+    <fragment
+        android:id="@+id/fragment_main_map"
+        android:name="comp3717.bcit.ca.hydrantfinder.MainMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"/>
+
 </RelativeLayout>

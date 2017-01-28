@@ -5,10 +5,8 @@
              android:layout_height="match_parent"
              tools:context="comp3717.bcit.ca.hydrantfinder.MainMapFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView_main_google_map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment"/>
-
+        android:layout_height="match_parent"/>
 </FrameLayout>

@@ -40,14 +40,14 @@ public class ShowItemActivity extends AppCompatActivity {
 
     public void displayItem() {
         Toast.makeText(getApplicationContext(), "Display hydrant item: id = " + hydrantItem.getHydrantId() + ", x: " +
-                        hydrantItem.getGeoLocation().getX() + ", y: " + hydrantItem.getGeoLocation().getY(),
+                        hydrantItem.getGeoLocation().latitude + ", y: " + hydrantItem.getGeoLocation().longitude,
                 Toast.LENGTH_LONG).show();
         //posx
         EditText editText_posX = (EditText) findViewById(R.id.editText_show_item_coord_x);
-        editText_posX.setText(hydrantItem.getGeoLocation().getX());
+        editText_posX.setText(Double.toString(hydrantItem.getGeoLocation().latitude));
         //posy
         EditText editText_posY = (EditText) findViewById(R.id.editText_show_item_coord_y);
-        editText_posY.setText(hydrantItem.getGeoLocation().getY());
+        editText_posY.setText(Double.toString(hydrantItem.getGeoLocation().longitude));
         //connector size
         EditText editText_connector_size = (EditText) findViewById(R.id.editText_show_item_con_size);
         editText_connector_size.setText(Integer.toString(hydrantItem.getConnector_size()));

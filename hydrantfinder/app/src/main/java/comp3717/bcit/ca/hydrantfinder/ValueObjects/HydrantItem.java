@@ -3,6 +3,8 @@ package comp3717.bcit.ca.hydrantfinder.ValueObjects;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.android.gms.maps.model.LatLng;
+
 /**
  * Created by jaydenliang on 2017-01-25.
  */
@@ -16,7 +18,7 @@ public class HydrantItem implements Parcelable {
             int connector_size = in.readInt();
             int port_number = in.readInt();
             double water_pressure = in.readDouble();
-            GeoItem geoLocation = in.readParcelable(GeoItem.class.getClassLoader());
+            LatLng geoLocation = in.readParcelable(LatLng.class.getClassLoader());
             return new HydrantItem(hydrantId, geoLocation, connector_size, port_number, water_pressure);
         }
 
@@ -28,18 +30,18 @@ public class HydrantItem implements Parcelable {
     private int connector_size;
     private int port_number;
     private double water_pressure;
-    private GeoItem geoLocation;
+    private LatLng geoLocation;
 
     // example constructor that takes a Parcel and gives you an object populated with it's values
-    public HydrantItem(int hydrantId, GeoItem geoLocation, int connector_size, int port_number, double water_pressure) {
+    public HydrantItem(int hydrantId, LatLng geoLocation, int connector_size, int port_number, double water_pressure) {
         this.hydrantId = hydrantId;
-        this.geoLocation = new GeoItem(geoLocation.getX(), geoLocation.getY());
+        this.geoLocation = new LatLng(geoLocation.latitude, geoLocation.longitude);
         this.connector_size = connector_size;
         this.port_number = port_number;
         this.water_pressure = water_pressure;
     }
 
-    public HydrantItem(int hydrantId, GeoItem geoLocation) {
+    public HydrantItem(int hydrantId, LatLng geoLocation) {
         this.hydrantId = hydrantId;
         this.geoLocation = geoLocation;
     }
@@ -60,7 +62,7 @@ public class HydrantItem implements Parcelable {
         return hydrantId;
     }
 
-    public GeoItem getGeoLocation() {
+    public LatLng getGeoLocation() {
         return geoLocation;
     }
 
