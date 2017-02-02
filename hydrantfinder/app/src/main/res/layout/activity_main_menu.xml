@@ -22,24 +22,4 @@
         app:headerLayout="@layout/nav_header_main_menu"
         app:menu="@menu/activity_main_menu_drawer" />
 
-    <Button
-        android:text="Port_out"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/port_out"
-        android:onClick="navigateToGetPortInfo"
-        android:layout_below="@+id/port_in"
-        android:layout_alignEnd="@+id/button_nav_search_address"
-        android:layout_marginEnd="21dp" />
-
-    <Button
-        android:text="Port_in"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/port_in"
-        android:layout_marginTop="48dp"
-        android:onClick="navigateToSetPortInfo"
-        android:layout_below="@+id/button_test_display_hydrant"
-        android:layout_alignEnd="@+id/button_test_display_hydrant" />
-
 </android.support.v4.widget.DrawerLayout>

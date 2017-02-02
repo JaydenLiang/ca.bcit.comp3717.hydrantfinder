@@ -18,4 +18,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_set_port_info">SetPortInfo</string>
     <string name="title_activity_get_port_info">GetPortInfo</string>
+    <string name="title_activity_report_bug">ReportBug</string>
+    <string name="title_activity_account_manage">AccountManage</string>
+    <string name="title_activity_sign_out">SignOut</string>
+    <string name="title_activity_sign_in">SignIn</string>
 </resources>
