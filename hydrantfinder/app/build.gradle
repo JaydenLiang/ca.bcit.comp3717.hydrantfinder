@@ -7,6 +7,7 @@ android {
         applicationId "comp3717.bcit.ca.hydrantfinder"
         minSdkVersion 17
         targetSdkVersion 25
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
