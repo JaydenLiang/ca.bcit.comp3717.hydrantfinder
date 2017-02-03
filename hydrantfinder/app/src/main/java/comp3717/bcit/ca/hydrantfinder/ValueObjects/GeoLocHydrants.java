@@ -11,6 +11,10 @@ import java.util.ArrayList;
  * Created by jaydenliang on 2017-01-26.
  */
 
+/**
+ * A Value Object that consists of a geo location and a hydrantItem array list.
+ * This Value Object is a Parcelable and able to be transfer via an intent.
+ */
 public class GeoLocHydrants implements Parcelable {
     // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
     public static final Parcelable.Creator<GeoLocHydrants> CREATOR = new Parcelable
@@ -25,6 +29,7 @@ public class GeoLocHydrants implements Parcelable {
             return new GeoLocHydrants[size];
         }
     };
+
     private LatLng geoLocation;
     private ArrayList<HydrantItem> hydrantItems;
 
@@ -37,10 +42,20 @@ public class GeoLocHydrants implements Parcelable {
         }
     }
 
+    /**
+     * Geo location
+     *
+     * @return
+     */
     public LatLng getGeoLocation() {
         return geoLocation;
     }
 
+    /**
+     * An array list of hydrant items
+     *
+     * @return
+     */
     public ArrayList<HydrantItem> getHydrantItems() {
         return hydrantItems;
     }

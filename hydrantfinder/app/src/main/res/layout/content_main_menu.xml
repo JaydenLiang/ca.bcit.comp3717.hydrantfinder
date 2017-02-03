@@ -34,34 +34,22 @@
         android:text="Search Address"/>
 
     <Button
-        android:id="@+id/button_test_display_hydrant"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/button_nav_setfilter"
-        android:layout_below="@+id/button_nav_setfilter"
-        android:layout_marginEnd="35dp"
-        android:layout_marginTop="70dp"
-        android:onClick="navigateToShowItemActivity"
-        android:text="test hydrant item 1"/>
-    <Button
-        android:text="Port_out"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/port_out"
-        android:onClick="navigateToGetPortInfo"
-        android:layout_below="@+id/port_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/button_nav_search_address"
-        android:layout_marginEnd="21dp" />
+        android:layout_below="@+id/port_in"
+        android:layout_marginEnd="21dp"
+        android:onClick="navigateToGetPortInfo"
+        android:text="Port_out"/>
 
     <Button
-        android:text="Port_in"
+        android:id="@+id/port_in"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/port_in"
         android:layout_marginTop="48dp"
         android:onClick="navigateToSetPortInfo"
-        android:layout_below="@+id/button_test_display_hydrant"
-        android:layout_alignEnd="@+id/button_test_display_hydrant" />
+        android:text="Port_in"/>
 
     <fragment
         android:id="@+id/fragment_main_map"

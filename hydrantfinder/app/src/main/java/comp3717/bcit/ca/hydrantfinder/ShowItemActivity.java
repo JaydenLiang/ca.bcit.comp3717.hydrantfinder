@@ -31,6 +31,7 @@ public class ShowItemActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        //this is the value object that contains info of a hydrantItem
         hydrantItem = getIntent().getParcelableExtra("hydrantItem");
         editMode = false;
         Button button_updateItem = (Button) findViewById(R.id.button_show_item_update);

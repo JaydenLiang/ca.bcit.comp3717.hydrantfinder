@@ -54,7 +54,7 @@ public class SetFilterActivity extends AppCompatActivity {
         });
 
         // Spinner Drop down elements
-        ArrayList<String> lowerLevel = DataAccessor.getInstance().getWaterPressureLevelRangeLowerBound();
+        ArrayList<String> lowerLevel = DataAccessor.getInstance().getFilterWaterPressureLevelRangeLowerBound();
 
         // Creating adapter for spinner
         ArrayAdapter<String> lowerLevelDataAdapter = new ArrayAdapter<>(this, android.R.layout
@@ -86,7 +86,7 @@ public class SetFilterActivity extends AppCompatActivity {
         });
 
         // Spinner Drop down elements
-        ArrayList<String> upperLevel = DataAccessor.getInstance().getWaterPressureLevelRangeUpperBound();
+        ArrayList<String> upperLevel = DataAccessor.getInstance().getFilterWaterPressureLevelRangeUpperBound();
 
         // Creating adapter for spinner
         ArrayAdapter<String> upperLevelDataAdapter = new ArrayAdapter<>(this, android.R.layout
@@ -101,6 +101,8 @@ public class SetFilterActivity extends AppCompatActivity {
     }
 
     public void applyFilter(final View view) {
+        //TODO set out a request to get a list of hydrant by calling the DataAccessor.applyFilter() method
+        //the DataAccessor.applyFilter() needs to implement
         finish();
     }
 

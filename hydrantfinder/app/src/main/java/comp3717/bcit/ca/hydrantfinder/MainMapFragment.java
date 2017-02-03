@@ -15,9 +15,13 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.HashMap;
+
 import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoLocHydrants;
+import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
 
 
 /**
@@ -28,7 +32,7 @@ import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoLocHydrants;
  * Use the {@link MainMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MainMapFragment extends Fragment implements OnMapReadyCallback {
+public class MainMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -42,7 +46,14 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback {
     private MapView mapView;
     private View view;
 
+    private boolean permissionGetMyCurrentLocation = false;
+
     private OnFragmentInteractionListener mListener;
+
+    /**
+     * a hash map that store Marker - Hydrant key-value pairs
+     */
+    private HashMap<Marker, HydrantItem> markerMapping;
 
     public MainMapFragment() {
         // Required empty public constructor
@@ -118,21 +129,78 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback {
         mListener = null;
     }
 
+    /**
+     * initialize the map component
+     *
+     * @param googleMap
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         MapsInitializer.initialize(getContext());
         this.googleMap = googleMap;
         this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        LatLng geoLocation = new LatLng(49.2509962, -123.0119258);
-        this.googleMap.addMarker(new MarkerOptions().position(geoLocation).title("BCIT")
-                .snippet("COMP3717 is awesome!"));
-        CameraPosition cameraPosition = CameraPosition.builder().target(geoLocation).zoom
+        this.googleMap.setOnMarkerClickListener(this);
+
+        handleUserPermissions();
+
+        //retrieve hydrants around the current location / selected location
+        //TODO need to get current geo location by goole API, now use BCIT's SE12 as current location
+        LatLng currentLoc = new LatLng(49.250024, -123.001528);//BCIT SE12
+        updateHydrantsOnMap(DataAccessor.getInstance().retrieveHydrantsOnLocation(currentLoc, 500));
+    }
+
+    /**
+     * This function will place map markers on the map where each marker is associated with a hydrant item
+     *
+     * @param geoLocHydrants an value object that consists of a geo location and a list of hydrants around that
+     *                       location.
+     */
+    public void updateHydrantsOnMap(GeoLocHydrants geoLocHydrants) {
+        //clear the marker-hydrantItem key-value pairs on every update
+        if (markerMapping == null) {
+            markerMapping = new HashMap<>();
+        } else {
+            markerMapping.clear();
+        }
+        MarkerOptions markerOptions;
+        Marker marker;
+        //loop to create markers and key-value pairs
+        for (HydrantItem hydrantItem : geoLocHydrants.getHydrantItems()) {
+            markerOptions = new MarkerOptions().position(hydrantItem.getGeoLocation()).title(hydrantItem
+                    .getDescription()).snippet("COMP3717 is awesome!");
+            marker = this.googleMap.addMarker(markerOptions);
+            //update marker-hydrantItem key-value pairs
+            markerMapping.put(marker, hydrantItem);
+        }
+        CameraPosition cameraPosition = CameraPosition.builder().target(geoLocHydrants.getGeoLocation()).zoom
                 (16).bearing(0).tilt(0).build();
         this.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
-    public void updateHydrantsOnMap(GeoLocHydrants geoLocHydrants) {
+    /**
+     * handle user permissions such as allow to show current location or not
+     */
+    private void handleUserPermissions() {
+        //TODO request user permission to show current location
+    }
 
+    /**
+     * Been called when a marker of the map is clicked
+     *
+     * @param marker the clicked marker
+     * @return
+     */
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        HashMap<Marker, HydrantItem> a = new HashMap<>();
+        //try to get the hydrant item paired with the marker
+        HydrantItem hydrantItem = markerMapping.get(marker);
+        //if hydrant item is found, retrieve its info and display it
+        if (hydrantItem != null) {
+            DataAccessor.getInstance().retrieveHydrantItem(getContext(), hydrantItem.getHydrantId(), true);
+            return true;
+        }
+        return false;
     }
 
     /**

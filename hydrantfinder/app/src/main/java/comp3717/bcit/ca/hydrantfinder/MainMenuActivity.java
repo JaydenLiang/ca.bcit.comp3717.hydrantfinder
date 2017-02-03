@@ -31,7 +31,9 @@ import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
 public class MainMenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MainMapFragment.OnFragmentInteractionListener {
     private static final String TAG = MainMenuActivity.class.getName();
+    //broadcast message receiver for relocation event
     private BroadcastReceiver addressRelocationReceiver;
+    //broadcast message receiver for hydrantItem retrieved event
     private BroadcastReceiver retrieveHydrantItemEventReceiver;
     private MapView googleMap;
 
@@ -61,6 +63,14 @@ public class MainMenuActivity extends AppCompatActivity
 
         initialMap();
 
+        initRelocationEventListener();
+        initRetrieveHydrantItemEventListener();
+    }
+
+    /**
+     * Initialize the event listener for relocation
+     */
+    private void initRelocationEventListener() {
         addressRelocationReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -75,7 +85,12 @@ public class MainMenuActivity extends AppCompatActivity
 
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(addressRelocationReceiver, new
                 IntentFilter(BroadcastType.LOCAL_ADDRESS_RELOCATION));
+    }
 
+    /**
+     * Initialize the event listener for hydrant item retrieval
+     */
+    private void initRetrieveHydrantItemEventListener() {
         retrieveHydrantItemEventReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -90,6 +105,9 @@ public class MainMenuActivity extends AppCompatActivity
                 new IntentFilter(BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM));
     }
 
+    /**
+     * initialize the map fragment
+     */
     private void initialMap() {
         if (googleMap != null) return;
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
@@ -135,28 +153,38 @@ public class MainMenuActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * open set filter page
+     *
+     * @param view
+     */
     public void navigateToSetFilterActivity(final View view){
         Log.d(TAG, "enter navigateToSetFilterActivity");
         Intent intentToOpenSetFilter = new Intent(this, SetFilterActivity.class);
         startActivity(intentToOpenSetFilter);
     }
 
+    /**
+     * open search address page
+     *
+     * @param view
+     */
     public void navigateToSearchAddressActivity(final View view){
         Log.d(TAG, "enter navigateToSearchAddressActivity");
         Intent intentToOpenSearchAddress = new Intent(this, SearchAddressActivity.class);
         startActivity(intentToOpenSearchAddress);
     }
 
+    /**
+     * open display hydrant item page
+     *
+     * @param hydrantItem hydrant item that's to display
+     */
     private void displayHydrantItem(HydrantItem hydrantItem) {
         Log.d(TAG, "enter displayHydrantItem");
         Intent intentToDisplayHydrantItem = new Intent(this, ShowItemActivity.class);
         intentToDisplayHydrantItem.putExtra("hydrantItem", hydrantItem);
         startActivity(intentToDisplayHydrantItem);
-    }
-
-    public void navigateToShowItemActivity(final View view) {
-        Log.d(TAG, "enter navigateToShowItemActivity");
-        DataAccessor.getInstance().retrieveHydrantItem(getApplicationContext(), 1, true);
     }
 
     public void navigateToSetPortInfo(final View view){
