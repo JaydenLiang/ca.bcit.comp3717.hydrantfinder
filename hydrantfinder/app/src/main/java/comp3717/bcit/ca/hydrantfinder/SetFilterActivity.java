@@ -103,6 +103,7 @@ public class SetFilterActivity extends AppCompatActivity {
     public void applyFilter(final View view) {
         //TODO set out a request to get a list of hydrant by calling the DataAccessor.applyFilter() method
         //the DataAccessor.applyFilter() needs to implement
+        DataAccessor.getInstance().applySearchFilter(getApplicationContext(), 0, 1, 10);
         finish();
     }
 

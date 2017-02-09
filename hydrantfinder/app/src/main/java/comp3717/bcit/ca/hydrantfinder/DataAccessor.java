@@ -193,6 +193,15 @@ public class DataAccessor {
         //TODO needs implementation
         //when server return the result, call the broadcast manager to broadcast a message to display hydrant items
         //the broadcast part is similar as
+        Intent intentToOpenFilter = new Intent(BroadcastType.LOCAL_SET_SEARCH_FILTER);
+        LatLng geoLocation = new LatLng(49.250024, -123.001528);//BCIT SE12
+        ArrayList<HydrantItem> hydrantItemArrayList = new ArrayList<>();
+        hydrantItemArrayList.add(new HydrantItem(1, 0, 7, 10));//good
+        hydrantItemArrayList.add(new HydrantItem(2, 1, 4, 6));//low
+        hydrantItemArrayList.add(new HydrantItem(3, 2, 1, 3));//bad
+        GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, 30, hydrantItemArrayList);
+        intentToOpenFilter.putExtra("geoLocHydrants", geoLocHydrants);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intentToOpenFilter);
         return false;
     }
 }

@@ -37,6 +37,9 @@ public class HydrantItem implements Parcelable {
     private double water_pressure;
     private LatLng geoLocation;
     private String description;
+    private int state;
+    private double pressureRangeMin;
+    private double pressureRangeMax;
 
     // example constructor that takes a Parcel and gives you an object populated with it's values
     public HydrantItem(int hydrantId, LatLng geoLocation, int connector_size, int port_number, double water_pressure,
@@ -52,6 +55,13 @@ public class HydrantItem implements Parcelable {
     public HydrantItem(int hydrantId, LatLng geoLocation) {
         this.hydrantId = hydrantId;
         this.geoLocation = geoLocation;
+    }
+
+    public HydrantItem(int hydrantId, int state, double pressureRangeMin, double pressureRangeMax) {
+        this.hydrantId = hydrantId;
+        this.state = state;
+        this.pressureRangeMin = pressureRangeMin;
+        this.pressureRangeMax = pressureRangeMax;
     }
 
     /**
@@ -104,6 +114,18 @@ public class HydrantItem implements Parcelable {
      */
     public String getDescription() {
         return description;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public double getRressureRangeMin(){
+        return pressureRangeMin;
+    }
+
+    public double getRressureRangeMax(){
+        return pressureRangeMax;
     }
 
     @Override
