@@ -69,7 +69,7 @@ public class DataAccessor {
         hydrantItemArrayList.add(new HydrantItem(2, new LatLng(49.251113, -123.002590)));//BCIT SW1
         hydrantItemArrayList.add(new HydrantItem(3, new LatLng(49.251232, -123.000842)));//BCIT SE2
         hydrantItemArrayList.add(new HydrantItem(4, new LatLng(49.250812, -122.999082)));//BCIT SE1
-        GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, hydrantItemArrayList);
+        GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, 100, hydrantItemArrayList);
         intentToRelocate.putExtra("geoLocHydrants", geoLocHydrants);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intentToRelocate);
     }
@@ -175,7 +175,7 @@ public class DataAccessor {
         hydrantItemArrayList.add(new HydrantItem(2, new LatLng(49.251113, -123.002590)));//BCIT SW1
         hydrantItemArrayList.add(new HydrantItem(3, new LatLng(49.251232, -123.000842)));//BCIT SE2
         hydrantItemArrayList.add(new HydrantItem(4, new LatLng(49.250812, -122.999082)));//BCIT SE1
-        GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, hydrantItemArrayList);
+        GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, 100, hydrantItemArrayList);
         return geoLocHydrants;
     }
 

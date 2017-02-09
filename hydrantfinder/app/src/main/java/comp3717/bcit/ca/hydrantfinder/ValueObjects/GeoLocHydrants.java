@@ -21,8 +21,9 @@ public class GeoLocHydrants implements Parcelable {
             .Creator<GeoLocHydrants>() {
         public GeoLocHydrants createFromParcel(Parcel in) {
             LatLng geoLocation = in.readParcelable(LatLng.class.getClassLoader());
+            double radius = in.readDouble();
             ArrayList<HydrantItem> hydrantItems = in.readArrayList(HydrantItem.class.getClassLoader());
-            return new GeoLocHydrants(geoLocation, hydrantItems);
+            return new GeoLocHydrants(geoLocation, radius, hydrantItems);
         }
 
         public GeoLocHydrants[] newArray(int size) {
@@ -32,9 +33,11 @@ public class GeoLocHydrants implements Parcelable {
 
     private LatLng geoLocation;
     private ArrayList<HydrantItem> hydrantItems;
+    private double radius;
 
-    public GeoLocHydrants(LatLng geoLocation, ArrayList<HydrantItem> hydrantItems) {
+    public GeoLocHydrants(LatLng geoLocation, double radius, ArrayList<HydrantItem> hydrantItems) {
         this.geoLocation = geoLocation;
+        this.radius = radius;
         if (hydrantItems != null) {
             this.hydrantItems = hydrantItems;
         } else {
@@ -49,6 +52,14 @@ public class GeoLocHydrants implements Parcelable {
      */
     public LatLng getGeoLocation() {
         return geoLocation;
+    }
+
+    /**
+     * radius that all hydrants within it from geo location. (meters)
+     * @return
+     */
+    public double getRadius() {
+        return radius;
     }
 
     /**
@@ -68,6 +79,7 @@ public class GeoLocHydrants implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(this.geoLocation, flags);
+        dest.writeDouble(this.radius);
         dest.writeList(this.hydrantItems);
     }
 }

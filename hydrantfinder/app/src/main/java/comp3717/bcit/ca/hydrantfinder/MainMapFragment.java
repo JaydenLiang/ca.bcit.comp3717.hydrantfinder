@@ -1,19 +1,34 @@
 package comp3717.bcit.ca.hydrantfinder;
 
+import android.Manifest;
 import android.content.Context;
-import android.net.Uri;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -32,11 +47,13 @@ import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
  * Use the {@link MainMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MainMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class MainMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final int PERMISSION_REQ_CODE_LOCATION_SERVICE = 1000;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -46,9 +63,17 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     private MapView mapView;
     private View view;
 
-    private boolean permissionGetMyCurrentLocation = false;
+    private boolean locationServicePermissionGranted = false;
+    private boolean mapReady = false;
 
     private OnFragmentInteractionListener mListener;
+
+    private GoogleApiClient googleApiClient;
+    private LocationRequest locationRequest;
+    private Location lastLocation;
+    private Circle circle;
+    private CircleOptions circleOptions;
+    private double defaultSearchRadius = 200;
 
     /**
      * a hash map that store Marker - Hydrant key-value pairs
@@ -84,6 +109,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        buildGoogleApiClient();
     }
 
     @Override
@@ -105,18 +131,12 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         }
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
+            mListener.onFragmentInteraction(this, FragmentInteractionType.FRAGMENT_ON_ATTACH);
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -140,13 +160,52 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         this.googleMap = googleMap;
         this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         this.googleMap.setOnMarkerClickListener(this);
+        this.mapReady = true;
+        OnEverythingReadyCall();
+    }
 
-        handleUserPermissions();
+    @Override
+    public void onStart() {
+        super.onStart();
+        this.googleApiClient.connect();
+    }
 
-        //retrieve hydrants around the current location / selected location
-        //TODO need to get current geo location by goole API, now use BCIT's SE12 as current location
-        LatLng currentLoc = new LatLng(49.250024, -123.001528);//BCIT SE12
-        updateHydrantsOnMap(DataAccessor.getInstance().retrieveHydrantsOnLocation(currentLoc, 500));
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.googleApiClient.disconnect();
+    }
+
+    synchronized void buildGoogleApiClient() {
+        googleApiClient = new GoogleApiClient.Builder(getContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    private synchronized void OnEverythingReadyCall() {
+        if (this.mapReady && this.googleApiClient.isConnected()) {
+            enableMyLocation();
+            locationRequest = LocationRequest.create();
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setInterval(10000); // Update location every second
+
+            if (locationServicePermissionGranted || ContextCompat.checkSelfPermission(getContext(), Manifest.permission
+                    .ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+            }
+
+            lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            //update hydrants on the map only when location is available.
+            if (lastLocation != null) {
+                cameraCenterToLocation(lastLocation, true, defaultSearchRadius);
+                //retrieve hydrants around the current location / selected location
+                updateHydrantsOnMap(DataAccessor.getInstance().retrieveHydrantsOnLocation(new LatLng(lastLocation.getLatitude
+                        (), lastLocation.getLongitude()), defaultSearchRadius));
+            }
+        }
     }
 
     /**
@@ -162,6 +221,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         } else {
             markerMapping.clear();
         }
+        //update markers
         MarkerOptions markerOptions;
         Marker marker;
         //loop to create markers and key-value pairs
@@ -172,18 +232,70 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
             //update marker-hydrantItem key-value pairs
             markerMapping.put(marker, hydrantItem);
         }
-        CameraPosition cameraPosition = CameraPosition.builder().target(geoLocHydrants.getGeoLocation()).zoom
-                (16).bearing(0).tilt(0).build();
-        this.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
     /**
      * handle user permissions such as allow to show current location or not
      */
-    private void handleUserPermissions() {
+    private void enableMyLocation() {
         //TODO request user permission to show current location
+        if (locationServicePermissionGranted || ContextCompat.checkSelfPermission(getContext(), Manifest.permission
+                .ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            this.locationServicePermissionGranted = true;
+            this.googleMap.setMyLocationEnabled(true);
+        } else {
+            // Request permission.
+            ActivityCompat.requestPermissions(this.getActivity(), new String[]{android.Manifest.permission
+                    .ACCESS_FINE_LOCATION}, PERMISSION_REQ_CODE_LOCATION_SERVICE);
+        }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_REQ_CODE_LOCATION_SERVICE) {
+            if (permissions.length == 1 &&
+                    permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted.
+                this.locationServicePermissionGranted = true;
+                enableMyLocation();
+            } else {
+                // Permission was denied. Display an error message.
+                Toast.makeText(getContext(), "You need to grant this app permission to access your location in order " +
+                        "to show hydrants around you.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void cameraCenterToLocation(Location location, boolean showCircle, double circleRadius) {
+        if (mapReady) {
+            if (showCircle) {
+                //draw circle
+                if (circle != null) {
+                    circle.remove();
+                }
+                circleOptions = new CircleOptions();
+                circleOptions.center(new LatLng(location.getLatitude(), location.getLongitude()))
+                        .radius(circleRadius)
+                        .strokeColor(Color.argb(0, 66, 194, 244))
+                        .fillColor(Color.argb(128, 66, 194, 244));
+                circle = this.googleMap.addCircle(circleOptions);
+            }
+            CameraPosition cameraPosition = CameraPosition.builder().target(new LatLng(location.getLatitude(), location
+                    .getLongitude())).zoom(16).bearing(0).tilt(0).build();
+            this.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
+    }
+
+    public void centerToMyCurrentLocation() {
+        if (this.lastLocation != null) {
+            cameraCenterToLocation(this.lastLocation, true, defaultSearchRadius);
+        } else {
+            Toast.makeText(getContext(), "You need to grant this app permission to access your location in order " +
+                    "to show hydrants around you.", Toast.LENGTH_SHORT).show();
+        }
+    }
     /**
      * Been called when a marker of the map is clicked
      *
@@ -203,6 +315,29 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         return false;
     }
 
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        OnEverythingReadyCall();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        buildGoogleApiClient();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        this.lastLocation = location;
+        if (this.lastLocation != null) {
+            cameraCenterToLocation(this.lastLocation, true, defaultSearchRadius);
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -215,6 +350,6 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteraction(Fragment fragment, String interactionType);
     }
 }

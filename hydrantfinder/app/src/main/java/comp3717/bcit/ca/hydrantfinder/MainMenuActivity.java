@@ -4,11 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,22 +18,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.maps.MapView;
-
 import comp3717.bcit.ca.hydrantfinder.SearchAddress.SearchAddressActivity;
 import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoLocHydrants;
 import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
 
+import static comp3717.bcit.ca.hydrantfinder.R.id.fab;
+
 public class MainMenuActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, MainMapFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, MainMapFragment.OnFragmentInteractionListener,
+        View.OnClickListener {
     private static final String TAG = MainMenuActivity.class.getName();
     //broadcast message receiver for relocation event
     private BroadcastReceiver addressRelocationReceiver;
     //broadcast message receiver for hydrantItem retrieved event
     private BroadcastReceiver retrieveHydrantItemEventReceiver;
-    private MapView googleMap;
+    private MainMapFragment mapFragment;
+    private FloatingActionButton showMyLocationButton;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,14 +41,8 @@ public class MainMenuActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        showMyLocationButton = (FloatingActionButton) findViewById(fab);
+        showMyLocationButton.setOnClickListener(this);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -60,8 +52,6 @@ public class MainMenuActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        initialMap();
 
         initRelocationEventListener();
         initRetrieveHydrantItemEventListener();
@@ -103,19 +93,6 @@ public class MainMenuActivity extends AppCompatActivity
 
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(retrieveHydrantItemEventReceiver,
                 new IntentFilter(BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM));
-    }
-
-    /**
-     * initialize the map fragment
-     */
-    private void initialMap() {
-        if (googleMap != null) return;
-        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-        if (googleAPI.isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS) {
-            //MapFragment mapFragment = getFragmentManager().findFragmentById(R.id.mapView_main_google_map);
-            //Fragment ragment = getFragmentManager().findFragmentById(R.id.mapView_main_google_map);
-            //ragment.getActivity();
-        }
     }
 
     @Override
@@ -200,8 +177,19 @@ public class MainMenuActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onFragmentInteraction(android.support.v4.app.Fragment fragment, String interactionType) {
+        if (interactionType == FragmentInteractionType.FRAGMENT_ON_ATTACH) {
+            mapFragment = (MainMapFragment) fragment;
+        }
+    }
 
+    @Override
+    public void onClick(View v) {
+        if (this.mapFragment != null) {
+            this.mapFragment.centerToMyCurrentLocation();
+        } else {
+            Toast.makeText(this, "Sorry, GoogleMap is not available now.", Toast.LENGTH_SHORT).show();
+        }
     }
 }
 
