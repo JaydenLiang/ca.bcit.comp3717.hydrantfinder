@@ -328,7 +328,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
      */
     @Override
     public boolean onMarkerClick(Marker marker) {
-        HashMap<Marker, HydrantItem> a = new HashMap<>();
+//        HashMap<Marker, HydrantItem> a = new HashMap<>();
         //try to get the hydrant item paired with the marker
         HydrantItem hydrantItem = markerMapping.get(marker);
         //if hydrant item is found, retrieve its info and display it

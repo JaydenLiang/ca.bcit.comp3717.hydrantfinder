@@ -30,6 +30,8 @@ import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
  */
 public class DataAccessor {
     private static DataAccessor instance;
+    private String data_url = "http://52.34.187.15/api/hydrantfinder.php";
+    //    private String data_url = "http://localhost/hydrantfinder.php";
     private ArrayList<SearchAddressListItem> historySearchAddressListItems;
 //    private
 
@@ -51,19 +53,26 @@ public class DataAccessor {
 
     private void onQueryResponse(Context context, JSONObject response, String broadcastType) {
         if (broadcastType != null) {
+            ArrayList<HydrantItem> hydrantItemArrayList;
             try {
                 switch (broadcastType) {
                     case BroadcastType.LOCAL_RETRIEVE_HYDRANTS_ON_LOCATION:
                         Intent intentToOpenFilter = new Intent(BroadcastType.LOCAL_RETRIEVE_HYDRANTS_ON_LOCATION);
                         LatLng geoLocation = new LatLng(Double.parseDouble(response.get("latitude").toString()), Double
                                 .parseDouble(response.get("longitude").toString()));//BCIT SE12
-                        ArrayList<HydrantItem> hydrantItemArrayList = hydrantItemParser(response.getJSONArray
-                                ("result"));
+                        hydrantItemArrayList = hydrantItemParser(response.getJSONArray("result"));
                         GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, Double.parseDouble(response
                                 .get("radius").toString()), hydrantItemArrayList);
                         intentToOpenFilter.putExtra("geoLocHydrants", geoLocHydrants);
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intentToOpenFilter);
                         break;
+                    case BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM:
+                        hydrantItemArrayList = hydrantItemParser(response.getJSONArray("result"));
+                        if (hydrantItemArrayList.size() > 0) {
+                            Intent intentToDisplayHydrantItem = new Intent(BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM);
+                            intentToDisplayHydrantItem.putExtra("hydrantItem", hydrantItemArrayList.get(0));
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(intentToDisplayHydrantItem);
+                        }
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -160,14 +169,12 @@ public class DataAccessor {
      */
     public void retrieveHydrantItem(Context context, int itemId, boolean showItem) {
         //retrieve data from db
-        HydrantItem hydrantItem = new HydrantItem(itemId, new LatLng(49.2509962, -123.0119258), 1, 2, 5.5, "Test " +
-                "Hydrant Item");
-        //broadcast to display the item
-        if (showItem) {
-            Intent intentToDisplayHydrantItem = new Intent(BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM);
-            intentToDisplayHydrantItem.putExtra("hydrantItem", hydrantItem);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intentToDisplayHydrantItem);
-        }
+        AsyncTaskHttpGet runner = new AsyncTaskHttpGet(context, this.data_url,
+                BroadcastType.LOCAL_DISPLAY_HYDRANT_ITEM);
+        HashMap<String, String> data = new HashMap<>();
+        data.put("hydrantfinder", "1");
+        data.put("id", Integer.toString(itemId));
+        runner.execute(data);
     }
 
     /**
@@ -219,13 +226,13 @@ public class DataAccessor {
      */
     public void retrieveHydrantsOnLocation(Context context, LatLng geoLocation, double searchRadius) {
         //TODO need implementation, now here is a testing code
-        AsyncTaskHttpGet runner = new AsyncTaskHttpGet(context, "http://52.34.187.15/api/hydrantfinder.php",
+        AsyncTaskHttpGet runner = new AsyncTaskHttpGet(context, this.data_url,
                 BroadcastType.LOCAL_RETRIEVE_HYDRANTS_ON_LOCATION);
         HashMap<String, String> data = new HashMap<>();
         data.put("hydrantfinder", "1");
-        data.put("rad", "0.0474");
-        data.put("long", "-122.9552870");
-        data.put("lat", "49.2032659");
+        data.put("rad", Double.toString(searchRadius));
+        data.put("long", Double.toString(geoLocation.longitude));
+        data.put("lat", Double.toString(geoLocation.latitude));
         runner.execute(data);
     }
 
@@ -273,7 +280,7 @@ public class DataAccessor {
 
         @Override
         protected Double doInBackground(HashMap<String, String>... params) {
-            postData(this.url, params[0]);
+            postData(params[0]);
             return null;
         }
 
@@ -294,7 +301,7 @@ public class DataAccessor {
             this.broadcastType = broadcastType;
         }
 
-        public void postData(String urlString, HashMap<String, String> data) {
+        public void postData(HashMap<String, String> data) {
             // Create a new HttpClient and Post Header
             URL url;
             HttpURLConnection urlConnection = null;
