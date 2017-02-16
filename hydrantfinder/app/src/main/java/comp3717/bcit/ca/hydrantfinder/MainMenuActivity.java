@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+import android.widget.Button;
 
 import comp3717.bcit.ca.hydrantfinder.SearchAddress.SearchAddressActivity;
 import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoLocHydrants;
@@ -35,6 +36,7 @@ public class MainMenuActivity extends AppCompatActivity
     private BroadcastReceiver retrieveHydrantItemEventReceiver;
     private MainMapFragment mapFragment;
     private FloatingActionButton showMyLocationButton;
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,7 +139,13 @@ public class MainMenuActivity extends AppCompatActivity
             startActivity(intentToOpenAccountManage);
 
         } else if (id == R.id.nav_share) {
-
+                Intent myIntent = new Intent(Intent.ACTION_SEND);
+                myIntent.setType("Text/plain");
+                String shareBody = "Your body here";
+                String shareSub = "Your subject here";
+                myIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
+                myIntent.putExtra(Intent.EXTRA_SUBJECT, shareSub);
+                startActivity(Intent.createChooser(myIntent, "Share Using"));
         } else if (id == R.id.nav_sign_in) {
             Intent intentToOpenSignIn = new Intent(this, SignIn.class);
             startActivity(intentToOpenSignIn);

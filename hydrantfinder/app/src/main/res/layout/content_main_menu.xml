@@ -20,7 +20,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_marginEnd="11dp"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="70dp"
         android:onClick="navigateToSetFilterActivity"
         android:text="Filter"/>
 

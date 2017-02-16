@@ -22,4 +22,5 @@
     <string name="title_activity_account_manage">AccountManage</string>
     <string name="title_activity_sign_out">SignOut</string>
     <string name="title_activity_sign_in">SignIn</string>
+    <string name="title_activity_share">Share</string>
 </resources>
