@@ -1,7 +1,10 @@
 package comp3717.bcit.ca.hydrantfinder;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -11,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,6 +78,8 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     private Circle circle;
     private CircleOptions circleOptions;
     private double defaultSearchRadius = 200;
+
+    private BroadcastReceiver retrieveHydrantsOnLocationReceiver;
 
     /**
      * a hash map that store Marker - Hydrant key-value pairs
@@ -202,10 +208,28 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
             if (lastLocation != null) {
                 cameraCenterToLocation(lastLocation, true, defaultSearchRadius);
                 //retrieve hydrants around the current location / selected location
-                updateHydrantsOnMap(DataAccessor.getInstance().retrieveHydrantsOnLocation(new LatLng(lastLocation.getLatitude
-                        (), lastLocation.getLongitude()), defaultSearchRadius));
+                initRetrieveHydrantsOnLocationEventListener();
+                DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), new LatLng(lastLocation
+                        .getLatitude(), lastLocation.getLongitude()), defaultSearchRadius);
             }
         }
+    }
+
+    private void initRetrieveHydrantsOnLocationEventListener() {
+        retrieveHydrantsOnLocationReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                GeoLocHydrants geoLocHydrants = intent.getParcelableExtra("geoLocHydrants");
+                //add markers on the map
+                updateHydrantsOnMap(geoLocHydrants);
+                Toast.makeText(getContext(), "Found " + geoLocHydrants.getHydrantItems().size() +
+                        " Hydrant(s) around Location: " + geoLocHydrants.getGeoLocation().latitude + "," +
+                        geoLocHydrants.getGeoLocation().longitude, Toast.LENGTH_LONG).show();
+            }
+        };
+
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(retrieveHydrantsOnLocationReceiver, new
+                IntentFilter(BroadcastType.LOCAL_RETRIEVE_HYDRANTS_ON_LOCATION));
     }
 
     /**

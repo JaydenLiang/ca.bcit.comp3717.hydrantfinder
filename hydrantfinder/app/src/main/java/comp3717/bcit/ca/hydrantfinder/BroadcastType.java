@@ -19,5 +19,6 @@ public class BroadcastType {
     public static final String LOCAL_DISPLAY_HYDRANT_ITEM = "local_display_hydrant_item";
 
     public static final String LOCAL_SET_SEARCH_FILTER = "local_set_search_filter";
+    public static final String LOCAL_RETRIEVE_HYDRANTS_ON_LOCATION = "local_retrieve_hydrants_on_location";
 
 }

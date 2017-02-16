@@ -5,6 +5,9 @@ import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by jaydenliang on 2017-01-25.
  */
@@ -51,7 +54,6 @@ public class HydrantItem implements Parcelable {
         this.water_pressure = water_pressure;
         this.description = description;
     }
-
     public HydrantItem(int hydrantId, LatLng geoLocation) {
         this.hydrantId = hydrantId;
         this.geoLocation = geoLocation;
@@ -62,6 +64,18 @@ public class HydrantItem implements Parcelable {
         this.state = state;
         this.pressureRangeMin = pressureRangeMin;
         this.pressureRangeMax = pressureRangeMax;
+    }
+
+    public static HydrantItem parse(JSONObject json) {
+        HydrantItem hydrantItem = null;
+        try {
+            LatLng geoLocation = new LatLng(json.getDouble("latitude"), json.getDouble("longitude"));
+            hydrantItem = new HydrantItem(json.getInt("id"), geoLocation, json.getInt("conn_size"), json.getInt
+                    ("port_size"), -1, json.getString("feature"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return hydrantItem;
     }
 
     /**

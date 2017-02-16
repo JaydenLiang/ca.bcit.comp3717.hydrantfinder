@@ -2,11 +2,23 @@ package comp3717.bcit.ca.hydrantfinder;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import comp3717.bcit.ca.hydrantfinder.SearchAddress.SearchAddressListItem;
 import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoLocHydrants;
@@ -35,6 +47,43 @@ public class DataAccessor {
             instance = new DataAccessor();
         }
         return instance;
+    }
+
+    private void onQueryResponse(Context context, JSONObject response, String broadcastType) {
+        if (broadcastType != null) {
+            try {
+                switch (broadcastType) {
+                    case BroadcastType.LOCAL_RETRIEVE_HYDRANTS_ON_LOCATION:
+                        Intent intentToOpenFilter = new Intent(BroadcastType.LOCAL_RETRIEVE_HYDRANTS_ON_LOCATION);
+                        LatLng geoLocation = new LatLng(Double.parseDouble(response.get("latitude").toString()), Double
+                                .parseDouble(response.get("longitude").toString()));//BCIT SE12
+                        ArrayList<HydrantItem> hydrantItemArrayList = hydrantItemParser(response.getJSONArray
+                                ("result"));
+                        GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, Double.parseDouble(response
+                                .get("radius").toString()), hydrantItemArrayList);
+                        intentToOpenFilter.putExtra("geoLocHydrants", geoLocHydrants);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(intentToOpenFilter);
+                        break;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private ArrayList<HydrantItem> hydrantItemParser(JSONArray json) {
+        ArrayList<HydrantItem> hydrantItemArrayList = new ArrayList<>();
+        try {
+            for (int i = 0; i < json.length(); i++) {
+                HydrantItem hydrantItem = HydrantItem.parse(json.getJSONObject(i));
+                if (hydrantItem != null)
+                    hydrantItemArrayList.add(hydrantItem);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } finally {
+            return hydrantItemArrayList;
+        }
     }
 
     /**
@@ -168,15 +217,16 @@ public class DataAccessor {
      * @param searchRadius the radius (meter) bases on the geo location
      * @return
      */
-    public GeoLocHydrants retrieveHydrantsOnLocation(LatLng geoLocation, double searchRadius) {
+    public void retrieveHydrantsOnLocation(Context context, LatLng geoLocation, double searchRadius) {
         //TODO need implementation, now here is a testing code
-        ArrayList<HydrantItem> hydrantItemArrayList = new ArrayList<>();
-        hydrantItemArrayList.add(new HydrantItem(1, new LatLng(49.249377, -123.000594)));//BCIT SE14
-        hydrantItemArrayList.add(new HydrantItem(2, new LatLng(49.251113, -123.002590)));//BCIT SW1
-        hydrantItemArrayList.add(new HydrantItem(3, new LatLng(49.251232, -123.000842)));//BCIT SE2
-        hydrantItemArrayList.add(new HydrantItem(4, new LatLng(49.250812, -122.999082)));//BCIT SE1
-        GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, 100, hydrantItemArrayList);
-        return geoLocHydrants;
+        AsyncTaskHttpGet runner = new AsyncTaskHttpGet(context, "http://52.34.187.15/api/hydrantfinder.php",
+                BroadcastType.LOCAL_RETRIEVE_HYDRANTS_ON_LOCATION);
+        HashMap<String, String> data = new HashMap<>();
+        data.put("hydrantfinder", "1");
+        data.put("rad", "0.0474");
+        data.put("long", "-122.9552870");
+        data.put("lat", "49.2032659");
+        runner.execute(data);
     }
 
     /**
@@ -203,5 +253,92 @@ public class DataAccessor {
         intentToOpenFilter.putExtra("geoLocHydrants", geoLocHydrants);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intentToOpenFilter);
         return false;
+    }
+
+    private class AsyncTaskHttpGet extends AsyncTask<HashMap<String, String>, Integer, Double> {
+        private Context context;
+        private String url;
+        private String broadcastType = null;
+
+        public AsyncTaskHttpGet(Context context, String url) {
+            this.context = context;
+            this.url = url;
+        }
+
+        public AsyncTaskHttpGet(Context context, String url, String broadcastType) {
+            this.context = context;
+            this.url = url;
+            this.broadcastType = broadcastType;
+        }
+
+        @Override
+        protected Double doInBackground(HashMap<String, String>... params) {
+            postData(this.url, params[0]);
+            return null;
+        }
+
+        protected void onPostExecute(Double result) {
+            if (context != null) {
+                //Toast.makeText(context, "retrieving data...", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+//            pb.setProgress(progress[0]);
+            if (context != null) {
+                //Toast.makeText(context, "retrieving data...", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        public void setBroadcastType(String broadcastType) {
+            this.broadcastType = broadcastType;
+        }
+
+        public void postData(String urlString, HashMap<String, String> data) {
+            // Create a new HttpClient and Post Header
+            URL url;
+            HttpURLConnection urlConnection = null;
+            String content = "";
+            StringBuilder urlBulder = new StringBuilder();
+            JSONObject json = null;
+            try {
+                urlBulder.append(this.url);
+                if (data != null && data.size() > 0) {
+                    urlBulder.append("?");
+                    int size = 0;
+                    for (Map.Entry<String, String> entry : data.entrySet()) {
+                        urlBulder.append(entry.getKey() + "=" + entry.getValue() + (++size < data.size() ? "&" : ""));
+                    }
+                }
+                url = new URL(urlBulder.toString());
+
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestProperty("User-Agent", System.getProperty("http.agent"));
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.connect();
+
+                InputStream in = urlConnection.getInputStream();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    content += line;
+                }
+                json = new JSONObject(content);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (json != null) {
+                    onQueryResponse(context, json, this.broadcastType);
+                }
+            }
+        }
+
     }
 }
