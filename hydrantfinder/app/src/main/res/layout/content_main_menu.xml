@@ -17,7 +17,7 @@
         android:id="@+id/button_nav_setfilter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginEnd="11dp"
         android:layout_marginTop="70dp"
@@ -32,24 +32,6 @@
         android:layout_alignParentStart="true"
         android:onClick="navigateToSearchAddressActivity"
         android:text="Search Address"/>
-
-    <Button
-        android:id="@+id/port_out"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/button_nav_search_address"
-        android:layout_below="@+id/port_in"
-        android:layout_marginEnd="21dp"
-        android:onClick="navigateToGetPortInfo"
-        android:text="Port_out"/>
-
-    <Button
-        android:id="@+id/port_in"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:onClick="navigateToSetPortInfo"
-        android:text="Port_in"/>
 
     <fragment
         android:id="@+id/fragment_main_map"

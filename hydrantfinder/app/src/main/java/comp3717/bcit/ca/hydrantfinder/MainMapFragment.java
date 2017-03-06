@@ -8,10 +8,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -20,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -52,12 +49,12 @@ import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
  * create an instance of this fragment.
  */
 public class MainMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        LocationListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final int PERMISSION_REQ_CODE_LOCATION_SERVICE = 1000;
+    private static final int AUTO_UPDATE_LOCATION_INTERVAL = 10000;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -72,12 +69,11 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
 
     private OnFragmentInteractionListener mListener;
 
-    private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private Location lastLocation;
     private Circle circle;
     private CircleOptions circleOptions;
-    private double defaultSearchRadius = 200;
+    private double defaultSearchRadius = 0.002;
 
     private BroadcastReceiver retrieveHydrantsOnLocationReceiver;
 
@@ -115,7 +111,8 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        buildGoogleApiClient();
+
+        initRetrieveHydrantsOnLocationEventListener();
     }
 
     @Override
@@ -167,51 +164,17 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         this.googleMap.setOnMarkerClickListener(this);
         this.mapReady = true;
-        OnEverythingReadyCall();
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        this.googleApiClient.connect();
-    }
+    public void initLocationAutoUpdate(GoogleApiClient googleApiClient) {
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(AUTO_UPDATE_LOCATION_INTERVAL); // Update location every second
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        this.googleApiClient.disconnect();
-    }
-
-    synchronized void buildGoogleApiClient() {
-        googleApiClient = new GoogleApiClient.Builder(getContext())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
-    private synchronized void OnEverythingReadyCall() {
-        if (this.mapReady && this.googleApiClient.isConnected()) {
-            enableMyLocation();
-            locationRequest = LocationRequest.create();
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            locationRequest.setInterval(10000); // Update location every second
-
-            if (locationServicePermissionGranted || ContextCompat.checkSelfPermission(getContext(), Manifest.permission
-                    .ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-            }
-
-            lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-            //update hydrants on the map only when location is available.
-            if (lastLocation != null) {
-                cameraCenterToLocation(lastLocation, true, defaultSearchRadius);
-                //retrieve hydrants around the current location / selected location
-                initRetrieveHydrantsOnLocationEventListener();
-                DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), new LatLng(lastLocation
-                        .getLatitude(), lastLocation.getLongitude()), defaultSearchRadius);
-            }
+        if (locationServicePermissionGranted || ContextCompat.checkSelfPermission(getContext(), Manifest.permission
+                .ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
         }
     }
 
@@ -239,6 +202,8 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
      *                       location.
      */
     public void updateHydrantsOnMap(GeoLocHydrants geoLocHydrants) {
+        if (this.googleMap == null || !this.mapReady)
+            return;
         //clear the marker-hydrantItem key-value pairs on every update
         if (markerMapping == null) {
             markerMapping = new HashMap<>();
@@ -261,34 +226,15 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     /**
      * handle user permissions such as allow to show current location or not
      */
-    private void enableMyLocation() {
+    public void updateMyLocation() {
         //TODO request user permission to show current location
         if (locationServicePermissionGranted || ContextCompat.checkSelfPermission(getContext(), Manifest.permission
                 .ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            this.locationServicePermissionGranted = true;
             this.googleMap.setMyLocationEnabled(true);
-        } else {
-            // Request permission.
-            ActivityCompat.requestPermissions(this.getActivity(), new String[]{android.Manifest.permission
-                    .ACCESS_FINE_LOCATION}, PERMISSION_REQ_CODE_LOCATION_SERVICE);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_REQ_CODE_LOCATION_SERVICE) {
-            if (permissions.length == 1 &&
-                    permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted.
-                this.locationServicePermissionGranted = true;
-                enableMyLocation();
-            } else {
-                // Permission was denied. Display an error message.
-                Toast.makeText(getContext(), "You need to grant this app permission to access your location in order " +
-                        "to show hydrants around you.", Toast.LENGTH_SHORT).show();
-            }
+            LocationManager locationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
+            Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            onLocationChanged(location);
         }
     }
 
@@ -301,7 +247,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                 }
                 circleOptions = new CircleOptions();
                 circleOptions.center(new LatLng(location.getLatitude(), location.getLongitude()))
-                        .radius(circleRadius)
+                        .radius(circleRadius * 100000)
                         .strokeColor(Color.argb(0, 66, 194, 244))
                         .fillColor(Color.argb(128, 66, 194, 244));
                 circle = this.googleMap.addCircle(circleOptions);
@@ -340,25 +286,14 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        OnEverythingReadyCall();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        buildGoogleApiClient();
-    }
-
-    @Override
     public void onLocationChanged(Location location) {
         this.lastLocation = location;
-        if (this.lastLocation != null) {
-            cameraCenterToLocation(this.lastLocation, true, defaultSearchRadius);
+        //update hydrants on the map only when location is available.
+        if (lastLocation != null) {
+            cameraCenterToLocation(lastLocation, true, defaultSearchRadius);
+            //retrieve hydrants around the current location / selected location
+            DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), new LatLng(lastLocation
+                    .getLatitude(), lastLocation.getLongitude()), defaultSearchRadius);
         }
     }
 
