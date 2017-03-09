@@ -35,14 +35,15 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textImeMultiLine"
+        android:inputType="textMultiLine"
         android:text=""
         android:ems="10"
         android:layout_below="@+id/bug_description"
         android:layout_alignStart="@+id/bug_description"
         android:layout_marginStart="17dp"
         android:layout_marginTop="56dp"
-        android:id="@+id/input_bug_description" />
+        android:id="@+id/input_bug_description"
+        android:hint="bug description" />
 
     <Button
         android:text="Send"
