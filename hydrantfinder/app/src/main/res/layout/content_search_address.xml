@@ -14,14 +14,13 @@
                 tools:context="comp3717.bcit.ca.hydrantfinder.SearchAddress.SearchAddressActivity"
                 tools:showIn="@layout/activity_search_address">
 
-    <Button
-        android:id="@+id/button_cancel_search"
+    <ImageView
+        android:id="@+id/imageView_search_powered_by_google"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:onClick="cancelSearch"
-        android:text="Cancel"/>
+        app:srcCompat="@drawable/powered_by_google_light"/>
 
     <!--<ExpandableListView-->
         <!--android:layout_width="match_parent"-->
@@ -29,10 +28,32 @@
         <!--android:id="@+id/expandableListView_search_result_container"-->
         <!--android:layout_height="match_parent"-->
         <!--android:layout_below="@id/textview_input_address"></ExpandableListView>-->
+
+    <EditText
+        android:id="@+id/textview_search_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/imageView_search_powered_by_google"
+        android:hint="Enter address..."
+        android:minWidth="250dp"/>
+
+    <Button
+        android:id="@+id/button_apply_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textview_search_input"
+        android:layout_alignBottom="@+id/textview_search_input"
+        android:layout_toEndOf="@+id/textview_search_input"
+        android:gravity="center_vertical"
+        android:onClick="applySearch"
+        android:text="Find it!"/>
+
     <ListView
         android:id="@+id/listview_search_result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_below="@id/textview_search_input"
         />
 </RelativeLayout>

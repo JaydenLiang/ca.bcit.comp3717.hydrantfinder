@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -171,7 +170,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(AUTO_UPDATE_LOCATION_INTERVAL); // Update location every second
 
-        if (locationServicePermissionGranted || ContextCompat.checkSelfPermission(getContext(), Manifest.permission
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission
                 .ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
@@ -185,6 +184,8 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                 GeoLocHydrants geoLocHydrants = intent.getParcelableExtra("geoLocHydrants");
                 //add markers on the map
                 updateHydrantsOnMap(geoLocHydrants);
+                //camera center to
+                moveCamera(geoLocHydrants.getGeoLocation(), true, geoLocHydrants.getRadius());
                 Toast.makeText(getContext(), "Found " + geoLocHydrants.getHydrantItems().size() +
                         " Hydrant(s) around Location: " + geoLocHydrants.getGeoLocation().latitude + "," +
                         geoLocHydrants.getGeoLocation().longitude, Toast.LENGTH_LONG).show();
@@ -228,17 +229,17 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
      */
     public void updateMyLocation() {
         //TODO request user permission to show current location
-        if (locationServicePermissionGranted || ContextCompat.checkSelfPermission(getContext(), Manifest.permission
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission
                 .ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             this.googleMap.setMyLocationEnabled(true);
-            LocationManager locationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
-            Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            Location location = ((HydrantFinderApplication) getActivity().getApplication()).getGoogleAPIClientService()
+                    .getLastLocation();
             onLocationChanged(location);
         }
     }
 
-    private void cameraCenterToLocation(Location location, boolean showCircle, double circleRadius) {
+    private void moveCamera(LatLng location, boolean showCircle, double circleRadius) {
         if (mapReady) {
             if (showCircle) {
                 //draw circle
@@ -246,16 +247,20 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                     circle.remove();
                 }
                 circleOptions = new CircleOptions();
-                circleOptions.center(new LatLng(location.getLatitude(), location.getLongitude()))
+                circleOptions.center(location)
                         .radius(circleRadius * 100000)
                         .strokeColor(Color.argb(0, 66, 194, 244))
                         .fillColor(Color.argb(128, 66, 194, 244));
                 circle = this.googleMap.addCircle(circleOptions);
             }
-            CameraPosition cameraPosition = CameraPosition.builder().target(new LatLng(location.getLatitude(), location
-                    .getLongitude())).zoom(16).bearing(0).tilt(0).build();
+            CameraPosition cameraPosition = CameraPosition.builder()
+                    .target(location).zoom(16).bearing(0).tilt(0).build();
             this.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
+    }
+
+    private void cameraCenterToLocation(Location location, boolean showCircle, double circleRadius) {
+        moveCamera(new LatLng(location.getLatitude(), location.getLongitude()), showCircle, circleRadius);
     }
 
     public void centerToMyCurrentLocation() {

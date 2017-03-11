@@ -21,6 +21,7 @@ public class SearchAddressListItem implements Parcelable {
     };
     private int icon;
     private String address;
+    private String placeId;
 
     public SearchAddressListItem(String address, int icon) {
         this.address = address;
@@ -31,6 +32,7 @@ public class SearchAddressListItem implements Parcelable {
     private SearchAddressListItem(Parcel in) {
         icon = in.readInt();
         address = in.readString();
+        placeId = in.readString();
     }
 
     public String getAddress() {
@@ -49,6 +51,14 @@ public class SearchAddressListItem implements Parcelable {
         this.icon = icon;
     }
 
+    public String getPlaceId() {
+        return placeId;
+    }
+
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -58,5 +68,6 @@ public class SearchAddressListItem implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(icon);
         dest.writeString(address);
+        dest.writeString(placeId);
     }
 }

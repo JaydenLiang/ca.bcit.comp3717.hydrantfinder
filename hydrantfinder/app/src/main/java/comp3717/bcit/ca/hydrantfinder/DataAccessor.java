@@ -132,6 +132,10 @@ public class DataAccessor {
         LocalBroadcastManager.getInstance(context).sendBroadcast(intentToRelocate);
     }
 
+    public void applySearchAddress(Context context, LatLng location) {
+        retrieveHydrantsOnLocation(context, location, ApplicationConstants.ADDRESS_SEARCH_DEFAULT_RADIUS);
+    }
+
     /**
      * Add a search result to search history. A search result history list will display on the search page. The
      * history should be ideally saved to a DB.
