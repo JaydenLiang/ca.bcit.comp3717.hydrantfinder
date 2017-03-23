@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import comp3717.bcit.ca.hydrantfinder.ValueObjects.GeoLocHydrants;
 import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
@@ -72,7 +73,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     private Location lastLocation;
     private Circle circle;
     private CircleOptions circleOptions;
-    private double defaultSearchRadius = 0.002;
+    private double defaultSearchRadius = 300;//circle radius in meters
 
     private BroadcastReceiver retrieveHydrantsOnLocationReceiver;
 
@@ -209,6 +210,9 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         if (markerMapping == null) {
             markerMapping = new HashMap<>();
         } else {
+            for (Map.Entry<Marker, HydrantItem> entry : markerMapping.entrySet()) {
+                entry.getKey().remove();
+            }
             markerMapping.clear();
         }
         //update markers
@@ -239,6 +243,11 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         }
     }
 
+    /**
+     * @param location
+     * @param showCircle
+     * @param circleRadius unit is meter
+     */
     private void moveCamera(LatLng location, boolean showCircle, double circleRadius) {
         if (mapReady) {
             if (showCircle) {
@@ -248,7 +257,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                 }
                 circleOptions = new CircleOptions();
                 circleOptions.center(location)
-                        .radius(circleRadius * 100000)
+                        .radius(circleRadius)
                         .strokeColor(Color.argb(0, 66, 194, 244))
                         .fillColor(Color.argb(128, 66, 194, 244));
                 circle = this.googleMap.addCircle(circleOptions);
