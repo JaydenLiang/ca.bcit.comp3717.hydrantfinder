@@ -116,24 +116,11 @@ public class DataAccessor {
      * result is retrieved successfully from backend.
      *
      * @param context Usually pass getApplicationContext() or getContext() of an activity where call this method.
-     * @param address an address to lookup.
+     * @param location an latlng of a location to lookup.
+     * @param searchRadius the search radius
      */
-    public void applySearchAddress(Context context, String address) {
-        //Broadcast a message
-        Intent intentToRelocate = new Intent(BroadcastType.LOCAL_ADDRESS_RELOCATION);
-        LatLng geoLocation = new LatLng(49.250024, -123.001528);//BCIT SE12
-        ArrayList<HydrantItem> hydrantItemArrayList = new ArrayList<>();
-        hydrantItemArrayList.add(new HydrantItem(1, new LatLng(49.249377, -123.000594)));//BCIT SE14
-        hydrantItemArrayList.add(new HydrantItem(2, new LatLng(49.251113, -123.002590)));//BCIT SW1
-        hydrantItemArrayList.add(new HydrantItem(3, new LatLng(49.251232, -123.000842)));//BCIT SE2
-        hydrantItemArrayList.add(new HydrantItem(4, new LatLng(49.250812, -122.999082)));//BCIT SE1
-        GeoLocHydrants geoLocHydrants = new GeoLocHydrants(geoLocation, 100, hydrantItemArrayList);
-        intentToRelocate.putExtra("geoLocHydrants", geoLocHydrants);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intentToRelocate);
-    }
-
-    public void applySearchAddress(Context context, LatLng location) {
-        retrieveHydrantsOnLocation(context, location, ApplicationConstants.ADDRESS_SEARCH_DEFAULT_RADIUS);
+    public void applySearchAddress(Context context, LatLng location, double searchRadius) {
+        retrieveHydrantsOnLocation(context, location, searchRadius);
     }
 
     /**

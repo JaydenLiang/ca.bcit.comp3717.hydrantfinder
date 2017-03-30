@@ -40,7 +40,7 @@ public class GoogleServicesEnhancedActivity extends AppCompatActivity {
 
     protected void requestForPermission() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission
                         .ACCESS_FINE_LOCATION}, ApplicationConstants.PERMISSION_REQ_CODE_LOCATION_SERVICE);

@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -52,6 +53,7 @@ public class MainMenuActivity extends GoogleServicesEnhancedActivity
 
         showMyLocationButton = (FloatingActionButton) findViewById(fab);
         showMyLocationButton.setOnClickListener(this);
+        showMyLocationButton.setVisibility(View.INVISIBLE);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -61,6 +63,28 @@ public class MainMenuActivity extends GoogleServicesEnhancedActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        SeekBar seekBar = (SeekBar) findViewById(R.id.vertical_seekbar_filter_radius);
+        seekBar.setProgress(mapFragment.getSearchRadiusPercentage());
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                System.out.println("onProgressChanged:" + progress);
+                mapFragment.setSearchRadiusPercentage(progress);
+                mapFragment.updateRangeCircle();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                System.out.println("onStartTrackingTouch");
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                System.out.println("onStopTrackingTouch");
+                searchAtMapCenter(null);
+            }
+        });
 
         initRelocationEventListener();
         initRetrieveHydrantItemEventListener();
@@ -200,7 +224,13 @@ public class MainMenuActivity extends GoogleServicesEnhancedActivity
     public void navigateToSearchAddressActivity(final View view){
         Log.d(TAG, "enter navigateToSearchAddressActivity");
         Intent intentToOpenSearchAddress = new Intent(this, SearchAddressActivity.class);
+        intentToOpenSearchAddress.putExtra("searchRadius", mapFragment.getSearchRadius());
         startActivity(intentToOpenSearchAddress);
+    }
+
+    public void searchAtMapCenter(final View view) {
+        DataAccessor.getInstance().applySearchAddress(getApplicationContext(), mapFragment.getMapCenterLocation(),
+                mapFragment.getSearchRadius());
     }
 
     /**
@@ -235,7 +265,7 @@ public class MainMenuActivity extends GoogleServicesEnhancedActivity
         @Override
         public void run(GoogleApiClient googleApiClient) {
             mapFragment.initLocationAutoUpdate(googleApiClient);
-            mapFragment.updateMyLocation();
+            mapFragment.updateMyLocation(true);
         }
     }
 }

@@ -21,6 +21,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -49,7 +50,7 @@ import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
  * create an instance of this fragment.
  */
 public class MainMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
-        LocationListener {
+        LocationListener, GoogleMap.OnCameraMoveListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -73,7 +74,13 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     private Location lastLocation;
     private Circle circle;
     private CircleOptions circleOptions;
-    private double defaultSearchRadius = 300;//circle radius in meters
+    private Circle fixedCenteredCircle;
+    private float mapZoomLevelDefault = 15;
+    private boolean resetZoomLevel = true;
+    private int searchRadiusDefault = 300;//circle radius in meters
+    private int searchRadiusMin = 100;//circle radius in meters
+    private int searchRadiusMax = 1000;//circle radius in meters
+    private double searchRadius = searchRadiusDefault;
 
     private BroadcastReceiver retrieveHydrantsOnLocationReceiver;
 
@@ -163,7 +170,14 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         this.googleMap = googleMap;
         this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         this.googleMap.setOnMarkerClickListener(this);
+        this.googleMap.setOnCameraMoveListener(this);
         this.mapReady = true;
+        circleOptions = new CircleOptions();
+        circleOptions.center(this.googleMap.getCameraPosition().target)
+                .radius(10)
+                .strokeColor(Color.argb(0, 66, 194, 244))
+                .fillColor(Color.argb(128, 66, 194, 244));
+        fixedCenteredCircle = this.googleMap.addCircle(circleOptions);
     }
 
     public void initLocationAutoUpdate(GoogleApiClient googleApiClient) {
@@ -185,8 +199,12 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                 GeoLocHydrants geoLocHydrants = intent.getParcelableExtra("geoLocHydrants");
                 //add markers on the map
                 updateHydrantsOnMap(geoLocHydrants);
+//                if(lastLocation) {
+//                    lastLocation.setAltitude(geoLocHydrants.getGeoLocation().latitude);
+//                    lastLocation.setLongitude(geoLocHydrants.getGeoLocation().longitude);
+//                }
                 //camera center to
-                moveCamera(geoLocHydrants.getGeoLocation(), true, geoLocHydrants.getRadius());
+                moveCamera(geoLocHydrants.getGeoLocation(), true, geoLocHydrants.getRadius(), false);
                 Toast.makeText(getContext(), "Found " + geoLocHydrants.getHydrantItems().size() +
                         " Hydrant(s) around Location: " + geoLocHydrants.getGeoLocation().latitude + "," +
                         geoLocHydrants.getGeoLocation().longitude, Toast.LENGTH_LONG).show();
@@ -231,15 +249,26 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     /**
      * handle user permissions such as allow to show current location or not
      */
-    public void updateMyLocation() {
+    public void updateMyLocation(boolean resetZoomLevel) {
         //TODO request user permission to show current location
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission
                 .ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             this.googleMap.setMyLocationEnabled(true);
-            Location location = ((HydrantFinderApplication) getActivity().getApplication()).getGoogleAPIClientService()
+            boolean initialChange = this.lastLocation == null;
+            lastLocation = ((HydrantFinderApplication) getActivity().getApplication()).getGoogleAPIClientService()
                     .getLastLocation();
-            onLocationChanged(location);
+            //update hydrants on the map only when location is available.
+            if (initialChange) {
+                this.resetZoomLevel = true;
+
+                moveCamera(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()),
+                        true, searchRadius, true);
+                this.resetZoomLevel = false;
+                //retrieve hydrants around the current location / selected location
+                DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), new LatLng(lastLocation
+                        .getLatitude(), lastLocation.getLongitude()), searchRadius);
+            }
         }
     }
 
@@ -248,7 +277,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
      * @param showCircle
      * @param circleRadius unit is meter
      */
-    private void moveCamera(LatLng location, boolean showCircle, double circleRadius) {
+    private void moveCamera(LatLng location, boolean showCircle, double circleRadius, boolean resetZoomLevel) {
         if (mapReady) {
             if (showCircle) {
                 //draw circle
@@ -262,19 +291,23 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                         .fillColor(Color.argb(128, 66, 194, 244));
                 circle = this.googleMap.addCircle(circleOptions);
             }
+            float zoom = resetZoomLevel ? mapZoomLevelDefault : this.googleMap.getCameraPosition().zoom;
+            float bearing = resetZoomLevel ? 0 : this.googleMap.getCameraPosition().bearing;
+            float tilt = resetZoomLevel ? 0 : this.googleMap.getCameraPosition().tilt;
             CameraPosition cameraPosition = CameraPosition.builder()
-                    .target(location).zoom(16).bearing(0).tilt(0).build();
-            this.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    .target(location).zoom(zoom).bearing(bearing).tilt(tilt).build();
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+            this.googleMap.animateCamera(cameraUpdate);
         }
     }
 
     private void cameraCenterToLocation(Location location, boolean showCircle, double circleRadius) {
-        moveCamera(new LatLng(location.getLatitude(), location.getLongitude()), showCircle, circleRadius);
+        moveCamera(new LatLng(location.getLatitude(), location.getLongitude()), showCircle, circleRadius, resetZoomLevel);
     }
 
     public void centerToMyCurrentLocation() {
         if (this.lastLocation != null) {
-            cameraCenterToLocation(this.lastLocation, true, defaultSearchRadius);
+            cameraCenterToLocation(this.lastLocation, true, searchRadius);
         } else {
             Toast.makeText(getContext(), "You need to grant this app permission to access your location in order " +
                     "to show hydrants around you.", Toast.LENGTH_SHORT).show();
@@ -299,16 +332,47 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         return false;
     }
 
+    public int getSearchRadius() {
+        return (int) searchRadius;
+    }
+
+    public int getSearchRadiusMin() {
+        return searchRadiusMin;
+    }
+
+    public int getSearchRadiusMax() {
+        return searchRadiusMax;
+    }
+
+    public int getSearchRadiusDefault() {
+        return searchRadiusDefault;
+    }
+
+    public void updateRangeCircle() {
+        circle.setRadius(this.searchRadius);
+    }
+
+    public int getSearchRadiusPercentage() {
+        return (int) (this.searchRadius / (this.searchRadiusMax - this.searchRadiusMin) * 100);
+    }
+
+    public void setSearchRadiusPercentage(int percentage) {
+        this.searchRadius = (double) percentage / 100 * (this.searchRadiusMax - this.searchRadiusMin) + this
+                .searchRadiusMin;
+    }
+
+    public LatLng getMapCenterLocation() {
+        return this.googleMap.getCameraPosition().target;
+    }
+
     @Override
     public void onLocationChanged(Location location) {
         this.lastLocation = location;
-        //update hydrants on the map only when location is available.
-        if (lastLocation != null) {
-            cameraCenterToLocation(lastLocation, true, defaultSearchRadius);
-            //retrieve hydrants around the current location / selected location
-            DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), new LatLng(lastLocation
-                    .getLatitude(), lastLocation.getLongitude()), defaultSearchRadius);
-        }
+    }
+
+    @Override
+    public void onCameraMove() {
+        fixedCenteredCircle.setCenter(googleMap.getCameraPosition().target);
     }
 
     /**

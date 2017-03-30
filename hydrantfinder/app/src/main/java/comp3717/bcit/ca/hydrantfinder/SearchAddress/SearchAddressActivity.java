@@ -31,6 +31,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import comp3717.bcit.ca.hydrantfinder.ApplicationConstants;
 import comp3717.bcit.ca.hydrantfinder.DataAccessor;
 import comp3717.bcit.ca.hydrantfinder.GoogleServicesEnhancedActivity;
 import comp3717.bcit.ca.hydrantfinder.R;
@@ -47,6 +48,7 @@ public class SearchAddressActivity extends GoogleServicesEnhancedActivity implem
     private EditText searchInputTextView;
     private LatLngBounds bounds;
     private AutocompleteFilter autocompleteFilter;
+    private double searchRadius;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +66,8 @@ public class SearchAddressActivity extends GoogleServicesEnhancedActivity implem
                         .setAction("Action", null).show();
             }
         });
+
+        this.searchRadius = getIntent().getDoubleExtra("searchRadius", ApplicationConstants.ADDRESS_SEARCH_DEFAULT_RADIUS);
 
         searchInputTextView = (EditText) findViewById(R.id.textview_search_input);
         searchInputTextView.addTextChangedListener(new SearchInputWatcher());
@@ -190,7 +194,7 @@ public class SearchAddressActivity extends GoogleServicesEnhancedActivity implem
                             final Place place = places.get(0);
                             location = new LatLng(place.getLatLng().latitude, place.getLatLng().longitude);
                             places.release();
-                            DataAccessor.getInstance().applySearchAddress(getApplicationContext(), location);
+                            DataAccessor.getInstance().applySearchAddress(getApplicationContext(), location, searchRadius);
                             finish();
                         } else {
                             places.release();

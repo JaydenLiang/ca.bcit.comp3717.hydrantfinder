@@ -17,10 +17,9 @@
         android:id="@+id/button_nav_setfilter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginEnd="11dp"
-        android:layout_marginTop="70dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="14dp"
+        android:layout_toEndOf="@+id/button_nav_search_address"
         android:onClick="navigateToSetFilterActivity"
         android:text="Filter"/>
 
@@ -40,5 +39,24 @@
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"/>
+
+    <SeekBar
+        android:id="@+id/vertical_seekbar_filter_radius"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_nav_findhere"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:max="100"
+        android:rotation="180"/>
+
+    <Button
+        android:id="@+id/button_nav_findhere"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/button_nav_setfilter"
+        android:onClick="searchAtMapCenter"
+        android:text="Find Here"/>
 
 </RelativeLayout>
