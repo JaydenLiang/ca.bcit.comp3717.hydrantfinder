@@ -123,6 +123,12 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(retrieveHydrantsOnLocationReceiver);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -261,13 +267,14 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
             //update hydrants on the map only when location is available.
             if (initialChange) {
                 this.resetZoomLevel = true;
-
-                moveCamera(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()),
-                        true, searchRadius, true);
-                this.resetZoomLevel = false;
-                //retrieve hydrants around the current location / selected location
-                DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), new LatLng(lastLocation
-                        .getLatitude(), lastLocation.getLongitude()), searchRadius);
+                if (lastLocation != null) {
+                    moveCamera(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()),
+                            true, searchRadius, true);
+                    this.resetZoomLevel = false;
+                    //retrieve hydrants around the current location / selected location
+                    DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), new LatLng(lastLocation
+                            .getLatitude(), lastLocation.getLongitude()), searchRadius);
+                }
             }
         }
     }
