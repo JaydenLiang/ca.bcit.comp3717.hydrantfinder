@@ -46,7 +46,7 @@ public class ReportBug extends AppCompatActivity {
         finish();
     }
     protected void sendEmail(String message){
-        String[] to = new String[]{"juntrc@gmail.com"};
+        String[] to = new String[]{"hydrantFinder@mail.com"};
         String subject=("A message from your app!");
         Intent emailIntent=new Intent(Intent.ACTION_SEND);
         emailIntent.putExtra(Intent.EXTRA_EMAIL,to);

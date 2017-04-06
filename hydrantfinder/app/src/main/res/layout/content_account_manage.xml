@@ -31,6 +31,8 @@
         android:layout_alignStart="@+id/account_password"
         android:layout_marginBottom="66dp"
         android:id="@+id/account_update"
+        android:theme="@style/MyButton"
+        android:textColor="@color/white"
         android:onClick="updatePassword"/>
 
     <Button
@@ -41,6 +43,8 @@
         android:layout_toEndOf="@+id/title_account"
         android:layout_marginStart="56dp"
         android:id="@+id/account_cancel"
+        android:theme="@style/MyButton"
+        android:textColor="@color/white"
         android:onClick="backtoMain"/>
 
     <TextView

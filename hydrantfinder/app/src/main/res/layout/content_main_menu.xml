@@ -21,6 +21,8 @@
         android:layout_marginStart="14dp"
         android:layout_toEndOf="@+id/button_nav_search_address"
         android:onClick="navigateToSetFilterActivity"
+        android:theme="@style/MyButton"
+        android:textColor="@color/white"
         android:text="Filter"/>
 
     <Button
@@ -29,6 +31,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
+        android:theme="@style/MyButton"
+        android:textColor="@color/white"
         android:onClick="navigateToSearchAddressActivity"
         android:text="Search Address"/>
 
@@ -57,6 +61,8 @@
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@+id/button_nav_setfilter"
         android:onClick="searchAtMapCenter"
+        android:theme="@style/MyButton"
+        android:textColor="@color/white"
         android:text="Find Here"/>
 
 </RelativeLayout>

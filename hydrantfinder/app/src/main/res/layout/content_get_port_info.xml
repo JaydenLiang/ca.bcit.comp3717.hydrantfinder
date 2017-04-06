@@ -126,5 +126,7 @@
         android:layout_marginTop="350dp"
         android:layout_marginLeft="100dp"
         android:id="@+id/button_cancel_setPort"
+        android:theme="@style/MyButton"
+        android:textColor="@color/white"
         android:onClick="backtoMain"/>
 </RelativeLayout>

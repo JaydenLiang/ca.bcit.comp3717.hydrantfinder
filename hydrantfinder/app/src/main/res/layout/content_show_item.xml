@@ -21,6 +21,8 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:onClick="exitShowItem"
+        android:theme="@style/MyButton"
+        android:textColor="@color/white"
         android:text="Back"/>
 
     <TextView
@@ -143,6 +145,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:onClick="updateItem"
+        android:theme="@style/MyButton"
+        android:textColor="@color/white"
         android:text="Update"/>
 
 </RelativeLayout>
