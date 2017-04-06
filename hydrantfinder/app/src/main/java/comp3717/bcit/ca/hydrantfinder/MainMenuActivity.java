@@ -4,12 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -89,20 +87,13 @@ public class MainMenuActivity extends GoogleServicesEnhancedActivity
         initRelocationEventListener();
         initRetrieveHydrantItemEventListener();
 
-        requestForPermission();
         googleAPIClientService = ((HydrantFinderApplication) getApplication()).getGoogleAPIClientService();
         googleAPIClientService.addOnceOnConnectedCallback(new GoogleAPIClientConnectedCallback());
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission
-                .ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            googleAPIClientService.startService();
-        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        googleAPIClientService.startService();
     }
 
     @Override

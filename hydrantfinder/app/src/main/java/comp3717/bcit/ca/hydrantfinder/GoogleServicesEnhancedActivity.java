@@ -34,8 +34,18 @@ public class GoogleServicesEnhancedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestForPermission();
         googleAPIClientService = ((HydrantFinderApplication) getApplication()).getGoogleAPIClientService();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission
+                .ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            googleAPIClientService.startService();
+        } else
+            requestForPermission();
     }
 
     protected void requestForPermission() {
@@ -61,7 +71,7 @@ public class GoogleServicesEnhancedActivity extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSION_REQ_CODE_LOCATION_SERVICE:
                 if (permissions.length == 1 &&
-                        permissions[0] == android.Manifest.permission.ACCESS_FINE_LOCATION &&
+                        permissions[0].equals(android.Manifest.permission.ACCESS_FINE_LOCATION) &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission is granted.
                     //if service connection failed, try to prompt for the user to solve this.

@@ -50,7 +50,7 @@ import comp3717.bcit.ca.hydrantfinder.ValueObjects.HydrantItem;
  * create an instance of this fragment.
  */
 public class MainMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
-        LocationListener, GoogleMap.OnCameraMoveListener {
+        LocationListener, GoogleMap.OnCameraMoveStartedListener, GoogleMap.OnCameraMoveListener, GoogleMap.OnCameraIdleListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -75,8 +75,9 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     private Circle circle;
     private CircleOptions circleOptions;
     private Circle fixedCenteredCircle;
+    private boolean hideFixedCenteredCircleOnNextIdle = true;
     private float mapZoomLevelDefault = 15;
-    private boolean resetZoomLevel = true;
+    private boolean mapZoomReset = false;
     private int searchRadiusDefault = 300;//circle radius in meters
     private int searchRadiusMin = 100;//circle radius in meters
     private int searchRadiusMax = 1000;//circle radius in meters
@@ -177,13 +178,8 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         this.googleMap.setOnMarkerClickListener(this);
         this.googleMap.setOnCameraMoveListener(this);
+        this.googleMap.setOnCameraIdleListener(this);
         this.mapReady = true;
-        circleOptions = new CircleOptions();
-        circleOptions.center(this.googleMap.getCameraPosition().target)
-                .radius(10)
-                .strokeColor(Color.argb(0, 66, 194, 244))
-                .fillColor(Color.argb(128, 66, 194, 244));
-        fixedCenteredCircle = this.googleMap.addCircle(circleOptions);
     }
 
     public void initLocationAutoUpdate(GoogleApiClient googleApiClient) {
@@ -203,14 +199,14 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
             @Override
             public void onReceive(Context context, Intent intent) {
                 GeoLocHydrants geoLocHydrants = intent.getParcelableExtra("geoLocHydrants");
-                //add markers on the map
-                updateHydrantsOnMap(geoLocHydrants);
 //                if(lastLocation) {
 //                    lastLocation.setAltitude(geoLocHydrants.getGeoLocation().latitude);
 //                    lastLocation.setLongitude(geoLocHydrants.getGeoLocation().longitude);
 //                }
                 //camera center to
                 moveCamera(geoLocHydrants.getGeoLocation(), true, geoLocHydrants.getRadius(), false);
+                //add markers on the map
+                updateHydrantsOnMap(geoLocHydrants);
                 Toast.makeText(getContext(), "Found " + geoLocHydrants.getHydrantItems().size() +
                         " Hydrant(s) around Location: " + geoLocHydrants.getGeoLocation().latitude + "," +
                         geoLocHydrants.getGeoLocation().longitude, Toast.LENGTH_LONG).show();
@@ -250,6 +246,22 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
             //update marker-hydrantItem key-value pairs
             markerMapping.put(marker, hydrantItem);
         }
+        hideFixedCenteredCircleOnNextIdle = true;
+        updateFixedCenteredCircle(false);
+    }
+
+    private void updateFixedCenteredCircle(boolean visible) {
+        if (mapReady) {
+            if (fixedCenteredCircle != null) {
+                fixedCenteredCircle.remove();
+            }
+            circleOptions = new CircleOptions();
+            circleOptions.center(this.googleMap.getCameraPosition().target)
+                    .radius(circle != null ? circle.getRadius() : searchRadiusDefault)
+                    .strokeColor(Color.argb(255, 66, 194, 244));
+            fixedCenteredCircle = this.googleMap.addCircle(circleOptions);
+            fixedCenteredCircle.setVisible(visible);
+        }
     }
 
     /**
@@ -266,11 +278,9 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                     .getLastLocation();
             //update hydrants on the map only when location is available.
             if (initialChange) {
-                this.resetZoomLevel = true;
                 if (lastLocation != null) {
                     moveCamera(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()),
-                            true, searchRadius, true);
-                    this.resetZoomLevel = false;
+                            true, searchRadius, initialChange);
                     //retrieve hydrants around the current location / selected location
                     DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), new LatLng(lastLocation
                             .getLatitude(), lastLocation.getLongitude()), searchRadius);
@@ -286,6 +296,11 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
      */
     private void moveCamera(LatLng location, boolean showCircle, double circleRadius, boolean resetZoomLevel) {
         if (mapReady) {
+            //no need to move to the same location
+            if (location.longitude == this.googleMap.getCameraPosition().target.longitude
+                    && location.latitude == this.googleMap.getCameraPosition().target.latitude) {
+                return;
+            }
             if (showCircle) {
                 //draw circle
                 if (circle != null) {
@@ -294,22 +309,26 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                 circleOptions = new CircleOptions();
                 circleOptions.center(location)
                         .radius(circleRadius)
-                        .strokeColor(Color.argb(0, 66, 194, 244))
+                        .strokeColor(Color.argb(255, 66, 194, 244))
                         .fillColor(Color.argb(128, 66, 194, 244));
                 circle = this.googleMap.addCircle(circleOptions);
+                updateFixedCenteredCircle(false);
             }
-            float zoom = resetZoomLevel ? mapZoomLevelDefault : this.googleMap.getCameraPosition().zoom;
-            float bearing = resetZoomLevel ? 0 : this.googleMap.getCameraPosition().bearing;
-            float tilt = resetZoomLevel ? 0 : this.googleMap.getCameraPosition().tilt;
+            float zoom = resetZoomLevel || mapZoomReset ? mapZoomLevelDefault : this.googleMap.getCameraPosition().zoom;
+            float bearing = resetZoomLevel || mapZoomReset ? 0 : this.googleMap.getCameraPosition().bearing;
+            float tilt = resetZoomLevel || mapZoomReset ? 0 : this.googleMap.getCameraPosition().tilt;
             CameraPosition cameraPosition = CameraPosition.builder()
                     .target(location).zoom(zoom).bearing(bearing).tilt(tilt).build();
             CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+            if (resetZoomLevel && mapZoomReset == false) {
+                mapZoomReset = true;
+            }
             this.googleMap.animateCamera(cameraUpdate);
         }
     }
 
     private void cameraCenterToLocation(Location location, boolean showCircle, double circleRadius) {
-        moveCamera(new LatLng(location.getLatitude(), location.getLongitude()), showCircle, circleRadius, resetZoomLevel);
+        moveCamera(new LatLng(location.getLatitude(), location.getLongitude()), showCircle, circleRadius, mapZoomReset);
     }
 
     public void centerToMyCurrentLocation() {
@@ -356,7 +375,8 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     }
 
     public void updateRangeCircle() {
-        circle.setRadius(this.searchRadius);
+        if (circle != null)
+            circle.setRadius(this.searchRadius);
     }
 
     public int getSearchRadiusPercentage() {
@@ -378,8 +398,19 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     }
 
     @Override
+    public void onCameraMoveStarted(int i) {
+    }
+
+    @Override
     public void onCameraMove() {
-        fixedCenteredCircle.setCenter(googleMap.getCameraPosition().target);
+        fixedCenteredCircle.setVisible(false);
+    }
+
+    @Override
+    public void onCameraIdle() {
+        mapZoomReset = false;
+        updateFixedCenteredCircle(!hideFixedCenteredCircleOnNextIdle);
+        hideFixedCenteredCircleOnNextIdle = false;
     }
 
     /**
