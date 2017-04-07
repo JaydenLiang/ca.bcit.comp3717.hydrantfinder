@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -85,6 +88,9 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
 
     private BroadcastReceiver retrieveHydrantsOnLocationReceiver;
 
+    private Bitmap iconHighPress;
+    private Bitmap iconLowPress;
+
     /**
      * a hash map that store Marker - Hydrant key-value pairs
      */
@@ -119,6 +125,11 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        iconLowPress = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_hydrant)
+                , 75, 75, false);
+        iconHighPress = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_hydrant3)
+                , 75, 75, false);
 
         initRetrieveHydrantsOnLocationEventListener();
     }
@@ -241,7 +252,13 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         //loop to create markers and key-value pairs
         for (HydrantItem hydrantItem : geoLocHydrants.getHydrantItems()) {
             markerOptions = new MarkerOptions().position(hydrantItem.getGeoLocation()).title(hydrantItem
-                    .getDescription()).snippet("COMP3717 is awesome!");
+                    .getDescription()).snippet("Status: good");
+            if (hydrantItem.getState() == HydrantItem.STATE_HIGH_PRESS) {
+                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(iconHighPress));
+            } else if (hydrantItem.getState() == HydrantItem.STATE_MIDIUM_PRESS) {
+                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(iconHighPress));
+            } else
+                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(iconLowPress));
             marker = this.googleMap.addMarker(markerOptions);
             //update marker-hydrantItem key-value pairs
             markerMapping.put(marker, hydrantItem);
@@ -258,7 +275,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
             circleOptions = new CircleOptions();
             circleOptions.center(this.googleMap.getCameraPosition().target)
                     .radius(circle != null ? circle.getRadius() : searchRadiusDefault)
-                    .strokeColor(Color.argb(255, 66, 194, 244));
+                    .strokeColor(Color.argb(128, 66, 194, 244));
             fixedCenteredCircle = this.googleMap.addCircle(circleOptions);
             fixedCenteredCircle.setVisible(visible);
         }
@@ -339,6 +356,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                     "to show hydrants around you.", Toast.LENGTH_SHORT).show();
         }
     }
+
     /**
      * Been called when a marker of the map is clicked
      *

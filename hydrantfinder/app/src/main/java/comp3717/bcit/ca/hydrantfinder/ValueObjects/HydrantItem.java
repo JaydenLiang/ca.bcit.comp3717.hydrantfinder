@@ -17,6 +17,9 @@ import org.json.JSONObject;
  * This Value Object is a Parcelable and able to be transfer via an intent.
  */
 public class HydrantItem implements Parcelable {
+    public static final int STATE_HIGH_PRESS = 0;
+    public static final int STATE_MIDIUM_PRESS = 1;
+    public static final int STATE_LOW_PRESS = 2;
     // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
     public static final Parcelable.Creator<HydrantItem> CREATOR = new Parcelable
             .Creator<HydrantItem>() {
@@ -70,8 +73,9 @@ public class HydrantItem implements Parcelable {
         HydrantItem hydrantItem = null;
         try {
             LatLng geoLocation = new LatLng(json.getDouble("latitude"), json.getDouble("longitude"));
-            hydrantItem = new HydrantItem(json.getInt("id"), geoLocation, json.getInt("conn_size"), json.getInt
-                    ("port_size"), -1, json.getString("feature"));
+            hydrantItem = new HydrantItem(json.getInt("id"), geoLocation, json.getInt
+                    ("conn_size"), json.getInt("port_size"), json.getDouble("normal_press"),
+                    json.getString("feature"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -131,7 +135,7 @@ public class HydrantItem implements Parcelable {
     }
 
     public int getState() {
-        return state;
+        return water_pressure < 50 ? STATE_LOW_PRESS : water_pressure < 100 ? STATE_MIDIUM_PRESS : STATE_HIGH_PRESS;
     }
 
     public double getRressureRangeMin(){
