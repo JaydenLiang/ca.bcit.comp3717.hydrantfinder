@@ -18,7 +18,7 @@
     <application
         android:name=".HydrantFinderApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_hydrant2"
+        android:icon="@mipmap/ic_hydrant4"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
