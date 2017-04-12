@@ -100,6 +100,8 @@ public class MainMenuActivity extends GoogleServicesEnhancedActivity
     protected void onDestroy() {
         super.onDestroy();
         googleAPIClientService.stopService();
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(addressRelocationReceiver);
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(retrieveHydrantItemEventReceiver);
     }
 
     /**
