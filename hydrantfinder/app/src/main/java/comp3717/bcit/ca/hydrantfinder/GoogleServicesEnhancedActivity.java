@@ -27,6 +27,10 @@ import static comp3717.bcit.ca.hydrantfinder.ApplicationConstants.DIALOG_ERROR;
 import static comp3717.bcit.ca.hydrantfinder.ApplicationConstants.PERMISSION_REQ_CODE_LOCATION_SERVICE;
 import static comp3717.bcit.ca.hydrantfinder.ApplicationConstants.PERMISSION_REQ_RESOLVE_ERROR;
 
+/**
+ * This class is to provide with interactions for requesting permission for google service, and handling the failures
+ * on some google services, using dialogs.
+ */
 public class GoogleServicesEnhancedActivity extends AppCompatActivity {
     protected GoogleAPIClientService googleAPIClientService;
     private boolean resolvingError = false;
@@ -90,6 +94,11 @@ public class GoogleServicesEnhancedActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * show error dialog
+     *
+     * @param errorCode
+     */
     private void showErrorDialog(int errorCode) {
         final ErrorDialogFragment dialogFragment;
         final Bundle args;
@@ -108,6 +117,11 @@ public class GoogleServicesEnhancedActivity extends AppCompatActivity {
         Toast.makeText(this, "Google location service is temporarily unavailable.", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * start a service
+     *
+     * @param forIntentService
+     */
     protected void startLocationService(Intent forIntentService) {
         if (forIntentService.getParcelableArrayExtra(AddressServiceConstants.RECEIVER) == null) {
             //TODO multi-threading concerns: receiver handler thread is set to null

@@ -211,6 +211,11 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         }
     }
 
+    /**
+     * enable location auto update on location change
+     *
+     * @param googleApiClient
+     */
     public void initLocationAutoUpdate(GoogleApiClient googleApiClient) {
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -223,6 +228,9 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         }
     }
 
+    /**
+     * enable hydrant retrieval on location change
+     */
     private void initRetrieveHydrantsOnLocationEventListener() {
         retrieveHydrantsOnLocationReceiver = new BroadcastReceiver() {
             @Override
@@ -285,6 +293,11 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         updateFixedCenteredCircle(false);
     }
 
+    /**
+     * update the fixed centered circle for map dragging events
+     *
+     * @param visible
+     */
     private void updateFixedCenteredCircle(boolean visible) {
         if (mapReady) {
             if (fixedCenteredCircle != null) {
@@ -331,9 +344,13 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     }
 
     /**
-     * @param location
-     * @param showCircle
-     * @param circleRadius unit is meter
+     * move and update map camera
+     * @param location move to location
+     * @param showCircle show search radius circle or not
+     * @param circleRadius search radius
+     * @param resetZoomLevel reset camera zoom level to default or not
+     * @param cameraPos if given, move and update camera by this given cameraPosition object
+     * @param animation move and update camera using animation or not
      */
     private void moveCamera(LatLng location, boolean showCircle, double circleRadius, boolean resetZoomLevel,
                             CameraPosition cameraPos, boolean animation) {
@@ -376,11 +393,20 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         }
     }
 
+    /**
+     * move camera to center at a given location
+     * @param location move to location
+     * @param showCircle show search radius circle or not
+     * @param circleRadius search radius
+     */
     private void cameraCenterToLocation(Location location, boolean showCircle, double circleRadius) {
         moveCamera(new LatLng(location.getLatitude(), location.getLongitude()), showCircle, circleRadius,
                 mapZoomReset, null, true);
     }
 
+    /**
+     * move camera to center at user's current location
+     */
     public void centerToMyCurrentLocation() {
         if (this.lastLocation != null) {
             cameraCenterToLocation(this.lastLocation, true, searchRadius);
@@ -417,7 +443,6 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         return (int) searchRadius;
     }
 
-
     public int getSearchRadiusMin() {
         return searchRadiusMin;
     }
@@ -430,20 +455,37 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         return searchRadiusDefault;
     }
 
+    /**
+     * update the circle to match current search range
+     */
     public void updateRangeCircle() {
         if (circle != null)
             circle.setRadius(this.searchRadius);
     }
 
+    /**
+     * get search radius as a percentage (0% to 100%). The closer to 0% or 100%, the close to lower
+     * bound of the search radius or upper bound, respectively.
+     * @return
+     */
     public int getSearchRadiusPercentage() {
         return (int) (this.searchRadius / (this.searchRadiusMax - this.searchRadiusMin) * 100);
     }
 
+    /**
+     * set the search radius by percentage (0% to 100%). The closer to 0% or 100%, the close to lower
+     * bound of the search radius or upper bound, respectively.
+     * @param percentage
+     */
     public void setSearchRadiusPercentage(int percentage) {
         this.searchRadius = (double) percentage / 100 * (this.searchRadiusMax - this.searchRadiusMin) + this
                 .searchRadiusMin;
     }
 
+    /**
+     * get the center point of the visible area of the map
+     * @return
+     */
     public LatLng getMapCenterLocation() {
         return this.googleMap.getCameraPosition().target;
     }
