@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -80,6 +81,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
     private Circle fixedCenteredCircle;
     private boolean hideFixedCenteredCircleOnNextIdle = true;
     private float mapZoomLevelDefault = 15;
+    private CameraPosition lastCameraPosition;
     private boolean mapZoomReset = false;
     private int searchRadiusDefault = 300;//circle radius in meters
     private int searchRadiusMin = 100;//circle radius in meters
@@ -193,6 +195,22 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         this.mapReady = true;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("searchRadius", this.getSearchRadius());
+        outState.putParcelable("lastCameraPosition", this.googleMap.getCameraPosition());
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            lastCameraPosition = savedInstanceState.getParcelable("lastCameraPosition");
+            searchRadius = savedInstanceState.getInt("searchRadius");
+        }
+    }
+
     public void initLocationAutoUpdate(GoogleApiClient googleApiClient) {
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -215,7 +233,7 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
 //                    lastLocation.setLongitude(geoLocHydrants.getGeoLocation().longitude);
 //                }
                 //camera center to
-                moveCamera(geoLocHydrants.getGeoLocation(), true, geoLocHydrants.getRadius(), false);
+                moveCamera(geoLocHydrants.getGeoLocation(), true, geoLocHydrants.getRadius(), false, null, true);
                 //add markers on the map
                 updateHydrantsOnMap(geoLocHydrants);
                 Toast.makeText(getContext(), "Found " + geoLocHydrants.getHydrantItems().size() +
@@ -295,9 +313,15 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                     .getLastLocation();
             //update hydrants on the map only when location is available.
             if (initialChange) {
-                if (lastLocation != null) {
+                if (lastCameraPosition != null) {
+                    moveCamera(lastCameraPosition.target,
+                            true, searchRadius, initialChange, lastCameraPosition, false);
+                    //retrieve hydrants around the current location / selected location
+                    DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), lastCameraPosition.target
+                            , searchRadius);
+                } else if (lastLocation != null) {
                     moveCamera(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()),
-                            true, searchRadius, initialChange);
+                            true, searchRadius, initialChange, lastCameraPosition, true);
                     //retrieve hydrants around the current location / selected location
                     DataAccessor.getInstance().retrieveHydrantsOnLocation(getContext(), new LatLng(lastLocation
                             .getLatitude(), lastLocation.getLongitude()), searchRadius);
@@ -311,7 +335,9 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
      * @param showCircle
      * @param circleRadius unit is meter
      */
-    private void moveCamera(LatLng location, boolean showCircle, double circleRadius, boolean resetZoomLevel) {
+    private void moveCamera(LatLng location, boolean showCircle, double circleRadius, boolean resetZoomLevel,
+                            CameraPosition cameraPos, boolean animation) {
+        CameraPosition cameraPosition = cameraPos;
         if (mapReady) {
             //no need to move to the same location
             if (location.longitude == this.googleMap.getCameraPosition().target.longitude
@@ -331,21 +357,28 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
                 circle = this.googleMap.addCircle(circleOptions);
                 updateFixedCenteredCircle(false);
             }
-            float zoom = resetZoomLevel || mapZoomReset ? mapZoomLevelDefault : this.googleMap.getCameraPosition().zoom;
-            float bearing = resetZoomLevel || mapZoomReset ? 0 : this.googleMap.getCameraPosition().bearing;
-            float tilt = resetZoomLevel || mapZoomReset ? 0 : this.googleMap.getCameraPosition().tilt;
-            CameraPosition cameraPosition = CameraPosition.builder()
-                    .target(location).zoom(zoom).bearing(bearing).tilt(tilt).build();
+            if (cameraPosition == null) {
+                float zoom = resetZoomLevel || mapZoomReset ? mapZoomLevelDefault :
+                        this.googleMap.getCameraPosition().zoom;
+                float bearing = resetZoomLevel || mapZoomReset ? 0 : this.googleMap.getCameraPosition().bearing;
+                float tilt = resetZoomLevel || mapZoomReset ? 0 : this.googleMap.getCameraPosition().tilt;
+                cameraPosition = CameraPosition.builder()
+                        .target(location).zoom(zoom).bearing(bearing).tilt(tilt).build();
+            }
             CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
             if (resetZoomLevel && mapZoomReset == false) {
                 mapZoomReset = true;
             }
-            this.googleMap.animateCamera(cameraUpdate);
+            if (animation)
+                this.googleMap.animateCamera(cameraUpdate);
+            else
+                this.googleMap.moveCamera(cameraUpdate);
         }
     }
 
     private void cameraCenterToLocation(Location location, boolean showCircle, double circleRadius) {
-        moveCamera(new LatLng(location.getLatitude(), location.getLongitude()), showCircle, circleRadius, mapZoomReset);
+        moveCamera(new LatLng(location.getLatitude(), location.getLongitude()), showCircle, circleRadius,
+                mapZoomReset, null, true);
     }
 
     public void centerToMyCurrentLocation() {
@@ -376,9 +409,14 @@ public class MainMapFragment extends Fragment implements OnMapReadyCallback, Goo
         return false;
     }
 
+    public Location getLastLocation() {
+        return lastLocation;
+    }
+
     public int getSearchRadius() {
         return (int) searchRadius;
     }
+
 
     public int getSearchRadiusMin() {
         return searchRadiusMin;
